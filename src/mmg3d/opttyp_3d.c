@@ -61,7 +61,7 @@
  *    - 7: 0 obtuse face, 4 acute face, 0 big edge, 2 small edge.
  *
  */
-static int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
+int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
   MMG5_pTetra    pt;
   MMG5_pPoint    pa,pb,pc,pd;
   double    abx,aby,abz,acx,acy,acz,adx,ady,adz,v1,v2,v3,vol;
@@ -534,7 +534,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
         nbdy2++;
       }
       if(npeau) {
-        ier = 0;//MMG3D_optbdry(mesh,met,octree,k);
+        ier = MMG3D_optbdry(mesh,met,octree,k);
         if(ier) {
           nd++;
           ds[ityp]++;
@@ -563,7 +563,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
             /*   OCRIT *= 0.5; */
             /* } else */
             /*   OCRIT *= 0.75; */
-            ier = 0;//_MMG3D_splitItem(mesh,met,octree,k,item[0],1.01);
+            ier = _MMG3D_splitItem(mesh,met,octree,k,item[0],1.01);
             if(ddebug) printf("on split %d ?\n",ier);
 
             if(ier) {
@@ -573,7 +573,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
             }
           } /*end noinsert*/
 
-          ier = 0;//_MMG3D_swpalmostall(mesh,met,octree,k,item[0]);
+          ier = _MMG3D_swpalmostall(mesh,met,octree,k,item[0]);
           if(ddebug) printf("on swp2 %d ?\n",ier);
 
           if(ier > 0) {
@@ -581,7 +581,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
             ds[ityp]++;
             break;
           }
-          ier = 0;// _MMG3D_splitalmostall(mesh,met,octree,k,item[0]);
+          ier = _MMG3D_splitalmostall(mesh,met,octree,k,item[0]);
           if(ddebug) printf("on split2 %d ?\n",ier);
 
           if(ier > 0) {
