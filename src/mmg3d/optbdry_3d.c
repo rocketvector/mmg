@@ -113,13 +113,7 @@ int MMG3D_movetetrapoints(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,in
             return(-1);
 
           n = &(mesh->xpoint[ppt->xp].n1[0]);
-          // if ( MG_GET(pxt->ori,i) ) {
-          /* Useless because if the orientation of the tetra face is
-           * compatible with the triangle (MG_GET(ori,i)) we know that we
-           * are well orientated. Morever, may introduce numerical errors
-           * with wrinkled surfaces. */
-          // if ( !_MMG5_directsurfball(mesh, pt->v[i0],lists,ilists,n) )  continue;
-          // }
+
           if ( !MG_GET(pxt->ori,i) ) {
             if ( !_MMG5_directsurfball(mesh,pt->v[i0],lists,ilists,n) )
               continue;
@@ -141,11 +135,8 @@ int MMG3D_movetetrapoints(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,in
       }
     }
   }
-  if(nm)
-    return(1);
-  else
-    return(0);
 
+  return ( nm > 0 );
 }
 
 /**
@@ -163,7 +154,7 @@ int _MMG3D_coledges(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
   MMG5_pTetra pt;
   double      len;
   int         ied,iedg,iq,i1,ilistcol,listcol[MMG3D_LMAX+2];
-  int         il,ier;
+  int         ier;
   char        iface,ief;
 
   pt = &mesh->tetra[k];
@@ -172,7 +163,7 @@ int _MMG3D_coledges(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
     for(ied = 0 ; ied<3 ;ied++) {
       iedg  = _MMG5_arpt[i][ied];
       len =  _MMG5_lenedg(mesh,met,iedg,pt);
-
+#warning unable to check if the edge is req without computing the shell because the tet may be non-boundary but have a boundary edge
       if(len > 1.1) continue;
       iface = _MMG5_ifar[iedg][0];
       ief   = _MMG5_iarfinv[iface][iedg];
@@ -217,7 +208,6 @@ int _MMG3D_coledges(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
  */
 int _MMG3D_deletePoint(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
                        int k,int i) {
-  MMG5_pTetra pt;
   int         il,ilist,iel,ip,list[MMG3D_LMAX+2];
 
   ilist = _MMG5_boulevolp(mesh,k,i,list);
@@ -225,7 +215,6 @@ int _MMG3D_deletePoint(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
   for(il = 0 ; il<ilist ; il++) {
     iel = list[il] / 4;
     ip  = list[il] % 4;
-    pt  = &mesh->tetra[iel];
     if( _MMG3D_coledges(mesh,met,iel,ip) > 0 ) {
       return(1);
     }
@@ -249,111 +238,115 @@ int MMG3D_optbdry(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,int k) {
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
   double       lint,lbdy,len,lmin,lmax;
-  int          imin,imax;
-  int          iq,ib,i,j,ipb,list[MMG3D_LMAX+2];
-  int          iedg,ier,ilist,i1,ied,ia,it1,it2,ret,imove;
-  char         iface,ief;
-
-  imove = 0;
+  int          imax;
+  int          j,list[MMG3D_LMAX+2];
+  int          iedg,ier,ilist,ied,ia,it1,it2,ret,improved;
+  char         ifac2,ifac;
 
   pt = &mesh->tetra[k];
   assert(pt->xt);
 
   pxt = &mesh->xtetra[pt->xt];
 
-  for(i=0 ; i<4 ; i++)
-    if ( pxt->ftag[i] & MG_BDY ) break;
+  for(ifac=0 ; ifac<4 ; ifac++)
+    if ( pxt->ftag[ifac] & MG_BDY ) break;
 
-  ib  = i;
-  ipb = pt->v[ib];
+  assert ( ifac!=4 );
+
+  ier = 0;
 
   /*First : try to move the vertex in order to improve the quality*/
-  ier = 0;
-  for(j = 0 ; j<10 ; j++) {
-    imove = MMG3D_movetetrapoints(mesh,met,octree,k);
-    ier += imove;
-    if(!imove) break;
-  }
-  if(ier) {
-    //printf("youpi %d\n",ier);
-    imove = 1;
-    //return(1);
-  } else {
-    //printf("pas reussi on devrait bouger les points\n");
+  improved = 0;
+  if ( !mesh->info.noinsert ) {
+    for(j = 0 ; j<10 ; j++) {
+      ier = MMG3D_movetetrapoints(mesh,met,octree,k);
+      if ( ier<0 ) return -1;
+      else if ( !ier ) break;
+      improved += ier;
+    }
+
+    if ( improved ) {
+      if ( mesh->info.ddebug || mesh->info.imprim > 9 ) {
+        printf(" -- optbdry: %d move in tetra %d\n",improved,k);
+      }
+    }
   }
 
-  /*look at the lenght edges*/
-  imax = -1;
-  lmax = 0;
-  lint = 0;
-  for(ied = 0 ; ied<3 ;ied++) {
-      iedg  = _MMG5_arpt[i][ied];
+  if ( !mesh->info.noinsert ) {
+    /*look at the lenght edges*/
+    imax = -1;
+    lmax = 0;
+    lint = 0;
+#warning how to properly detect the boundary edges
+    for ( ifac2 = 0 ; ifac2<4 ;ifac2++) {
+      if ( pxt->ftag[ifac2] & MG_BDY ) continue;
+
+      for ( ied = 0; ied < 3; ++ied ) {
+#warning this can not work because a tetra may have multiple boundary faces
+        iedg  = _MMG5_arpt[ifac][ied];
       len =  _MMG5_lenedg(mesh,met,iedg,pt);
       lint += len;
       if(len > lmax) {
         imax = iedg;
         lmax = len;
       }
-  }
-  lint /= 3.;
-  lbdy = 0;
-  imin = -1;
-  lmin = 1000;
-  for(ied = 0 ; ied<3 ;ied++) {
-      iedg  = _MMG5_iarf[i][ied];
+    }
+    lint /= 3.;
+    lbdy = 0;
+    lmin = 1000;
+    for(ied = 0 ; ied<3 ;ied++) {
+      iedg  = _MMG5_iarf[ifac][ied];
       len = _MMG5_lenedg(mesh,met,iedg,pt);
       lbdy += len;
       if(len < lmin) {
-        imin = iedg;
         lmin = len;
       }
+    }
+    lbdy /= 3.;
 
-  }
-  lbdy /= 3.;
-  if(lint > 2.*lbdy) {
-    /* printf("internal edges too long..\n"); */
-    /* printf("lint %e -- lbdy %e for tet %d\n",lint,lbdy,k); */
-    /* printf("lmin %e -- lmax %e\n",lmin,lmax); */
-    ier = _MMG3D_splitItem(mesh,met,octree,k,imax,1.00001);
-    if(!ier) {
+    /** Try to split too long internal edges */
+    if(lint > 2.*lbdy) {
+      ier = _MMG3D_splitItem(mesh,met,octree,k,imax,1.00001);
+      if ( ier ) return 1;
+
       for(ied = 0 ; ied<3 ;ied++) {
-        iedg  = _MMG5_arpt[i][ied];
+        iedg  = _MMG5_arpt[ifac][ied];
         if(iedg == imax) continue;
         ier = _MMG3D_splitItem(mesh,met,octree,k,iedg,1.00001);
         if(ier)  {
-          return(1);
+          return 1;
         }
       }
-    } else {
-      return(1);
+
+      /* try to remove the non-bdry vertex : with all the edges containing the
+       * vertex*/
+#warning can not work because the edge may be boundary
+      ier = 0;//_MMG3D_deletePoint(mesh,met,octree,k,i);
+      if ( ier < 0 )  return -1;
+      else if ( ier ) return  1;
     }
-
-
-    /* try to remove the non-bdry vertex : with all the edges containing the vertex*/
-    ier = _MMG3D_deletePoint(mesh,met,octree,k,i);
-    if(ier) return(1);
   }
 
-  /*First : try to swap the 3 internal edges*/
+  /*First : try to swap the 3 other edges*/
   if(!mesh->info.noswap) {
     for(ied = 0 ; ied<3 ;ied++) {
-      iedg  = _MMG5_arpt[i][ied];
+      iedg  = _MMG5_arpt[ifac][ied];
       ier = _MMG3D_swpItem(mesh,met,octree,k,iedg);
-      if(ier) {
-        return(1);
+      if ( ier < -1 ) return -1;
+      else if ( ier ) return 1;
       }
     }
-    /*try to swap the bdry edges*/
-    ier = 0;
+
+    /*try to swap the 3 face edges*/
     for (j=0; j<3; j++) {
-      ia  = _MMG5_iarf[i][j];
+      ia  = _MMG5_iarf[ifac][j];
 
       /* No swap of geometric edge */
       if ( MG_EDG(pxt->tag[ia]) || (pxt->tag[ia] & MG_REQ) ||
            (pxt->tag[ia] & MG_NOM) )
         continue;
 
-      ret = _MMG5_coquilface(mesh,k,i,ia,list,&it1,&it2,0);
+      ret = _MMG5_coquilface(mesh,k,ifac,ia,list,&it1,&it2,0);
       ilist = ret / 2;
       if ( ret < 0 )  return(-1);
       /* CAUTION: trigger collapse with 2 elements */
@@ -365,7 +358,6 @@ int MMG3D_optbdry(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,int k) {
         ier = _MMG5_swpbdy(mesh,met,list,ret,it1,octree,2);
         if ( ier < 0 )  return(-1);
         else if(ier) {
-          //printf("swpbdy ok\n");
           return(1);
         }
       }
@@ -373,16 +365,15 @@ int MMG3D_optbdry(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,int k) {
   }
 
   /*Try : try to remove the non-bdry vertex*/
-  ier = 0;
   if ( !mesh->info.noinsert ) {
-    ier = _MMG3D_coledges(mesh,met,k,ib);
+    ier = 0;//_MMG3D_coledges(mesh,met,k,ifac);
 
     if ( !ier ) {
       /* try to remove the non-bdry vertex : with all the edges containing the
        * vertex*/
-      ier = _MMG3D_deletePoint(mesh,met,octree,k,i);
+      ier = 0;//_MMG3D_deletePoint(mesh,met,octree,k,ifac);
     }
   }
 
-  return( imove || ier );
+  return ( ier || improved );
 }

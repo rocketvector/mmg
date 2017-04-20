@@ -319,7 +319,7 @@ int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
  * \param iar index of edge to not try to swap.
  * \return -1 if fail, 0 if we don't swap anything, 1 otherwise.
  *
- * Try to swap edge \a iar of tetra \a k.
+ * Try to swap edge \a iar of tetra \a k (the edge may be boundary but not geometric).
  *
  */
 int _MMG3D_swpItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,int k,int iar) {
@@ -331,10 +331,12 @@ int _MMG3D_swpItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,int k,i
   int           nf = 0,j;
 
   ier = 0;
-  pt = &mesh->tetra[k];
+  pt  = &mesh->tetra[k];
   lon = _MMG5_coquil(mesh,k,iar,&list[0]);
-  if(lon%2) return(0);
+
+  if ( lon%2 ) return(0);
   lon = lon/2;
+
   if ( lon > 2 ) {
     crit = pt->qual;
     for (l=0; l<lon; l++) {
@@ -348,7 +350,7 @@ int _MMG3D_swpItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,int k,i
           if ( pxt->ftag[j] & MG_BDY )  nf++;
       }
     }
-    if(nf > 1) return(0);//printf("on risque de crreerrrr %d\n",nf);
+    if(nf > 1) return(0);
     if(l<lon)  {
       ier = 0;
     } else {
@@ -408,7 +410,8 @@ int _MMG3D_swpalmostall(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
  * \param OCRIT quality threshold.
  * \return 1 if success, 0 otherwise
  *
- * Try to split edge number \a iar of tetra \a k
+ * Try to split edge number \a iar of tetra \a k and, if we insert a new point, try
+ * to move it toward an optimal position.
  *
  */
 int _MMG3D_splitItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
@@ -421,6 +424,7 @@ int _MMG3D_splitItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
   ier = 0;
   pt = &mesh->tetra[k];
   len = _MMG5_lenedg(mesh,met,iar,pt);
+
   if(len > LLONG2) {
     ier = _MMG5_splitedg(mesh,met,k,iar,OCRIT);
   }
@@ -430,6 +434,7 @@ int _MMG3D_splitItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
       if(pt->v[j] == ier) break;
     }
     assert(j<4);
+
     if(met->size!=1)
       ier = _MMG3D_movv_ani(mesh,met,k,j);
     else

@@ -4185,15 +4185,16 @@ void _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
  * \param list pointer toward the shell of edge.
  * \param ret size of the shell of edge.
  * \param crit quality threshold.
- * \return 0 if fail, 1 otherwise.
+ * \return 0 if fail (too bad quality or required edge), 1 otherwise.
  *
- * Check quality before split.
+ * Check quality and required edge before split.
  *
  */
 static inline
 int _MMG3D_chksplit(MMG5_pMesh mesh, MMG5_pSol met,int ip,
                     int* list,int ret,double crit) {
   MMG5_pTetra   pt0,pt1;
+  MMG5_pxTetra  pxt;
   double        cal,critloc;
   int           l,jel,na,ipb,lon;
 
@@ -4202,6 +4203,11 @@ int _MMG3D_chksplit(MMG5_pMesh mesh, MMG5_pSol met,int ip,
   for (l=0; l<lon; l++) {
     jel = list[l] / 6;
     pt1 = &mesh->tetra[jel];
+    if ( pt1->xt ) {
+      pxt = &mesh->xtetra[pt1->xt];
+      if ( pxt->tag[list[l]%6] & MG_REQ )  return 0;
+    }
+
     if(pt1->qual < critloc) critloc = pt1->qual;
   }
   critloc *= crit;
@@ -4242,21 +4248,39 @@ int _MMG3D_chksplit(MMG5_pMesh mesh, MMG5_pSol met,int ip,
  *
  * Split edge iar of iel and verify that every new tet have a better quality than crit
  *
+ * \remark iar may be a boundary edge.
  */
 int _MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,int iel, int iar, double crit){
   MMG5_pTetra  pt;
+  MMG5_pxTetra pxt;
   MMG5_pPoint  p0,p1;
   double       o[3];
-  int          list[MMG3D_LMAX+2],i0,i1,ip,warn,lon,ier;
-  int16_t      tag;
+  int          list[MMG3D_LMAX+2],i0,i1,ip,warn,lon,ier,k,ilist,kel;
+  char         ie,ifac1,ifac2;
 
   warn = 0;
-  pt = &mesh->tetra[iel];
   lon = _MMG5_coquil(mesh,iel,iar,list);
-  if ( (!lon || lon<0) )
+  if ( lon<=0 )
     return(0);
-  if(lon%2) return(0);
 
+  #warning for now do not treat boundary edges... to try later
+  if ( lon%2 ) return(0); // open shell
+
+  ilist = lon/2;
+  for ( k=0; k<ilist; ++k ) {
+    kel = list[k]/6;
+    ie  = list[k]%6;
+    pt = &mesh->tetra[kel];
+    if ( !pt->xt ) continue;
+
+    pxt = &mesh->xtetra[pt->xt];
+    ifac1 = _MMG5_ifar[ie][0];
+    ifac2 = _MMG5_ifar[ie][1];
+    /* Detect boundary edge */
+    if ( pxt->tag[ifac1] & MG_BDY || pxt->tag[ifac2] & MG_BDY ) return 0;
+  }
+
+  pt = &mesh->tetra[iel];
   i0 = pt->v[_MMG5_iare[iar][0]];
   i1 = pt->v[_MMG5_iare[iar][1]];
   p0  = &mesh->point[i0];

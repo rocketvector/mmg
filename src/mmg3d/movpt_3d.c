@@ -1846,13 +1846,24 @@ int _MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   return(1);
 }
 
-
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the metric structure.
+ * \param k tetra index
+ * \param ib index of point that we try to move.
+ *
+ * \return 0 if fail, 1 if success.
+ *
+ * Move point \a ib in tetra \a k.
+ *
+ */
 int _MMG3D_movv_ani(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
   MMG5_pTetra   pt,pt1;
   MMG5_pPoint   ppa,ppb,p1,p2,p3;
   int           j,iadr,ipb,iter,maxiter,l,lon,iel,i1,i2,i3,list[MMG3D_LMAX+2];
   double        *mp,coe,qualtet[MMG3D_LMAX+2];
   double        ax,ay,az,bx,by,bz,nx,ny,nz,dd,len,qual,oldc[3];
+
   assert(k);
   assert(ib<4);
   pt = &mesh->tetra[k];
@@ -1923,7 +1934,8 @@ int _MMG3D_movv_ani(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
       pt1 = &mesh->tetra[iel];
 
       qual = _MMG5_caltet(mesh,sol,pt1);
-      /*warning if we increase the coefficient (ex 1.4), the mesh quality becomes poor very quickly*/
+      /*warning if we increase the coefficient (ex 1.4), the mesh quality
+       * becomes poor very quickly*/
       if ( qual*1.01 <= pt1->qual) break;
       qualtet[l] = qual;
 
@@ -1942,14 +1954,22 @@ int _MMG3D_movv_ani(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
     pt1 = &mesh->tetra[iel];
     pt1->qual = qualtet[l];
     pt1->mark = mesh->mark;
-    //    if ( pt1->qual < declic )
-    //  MMG_kiudel(queue,iel);
   }
   return(1);
 
 }
 
-
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the metric structure.
+ * \param k tetra index
+ * \param ib index of point that we try to move.
+ *
+ * \return 0 if fail, 1 if success.
+ *
+ * Move point \a ib in tetra \a k.
+ *
+ */
 int _MMG3D_movv_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
   MMG5_pTetra pt,pt1;
   MMG5_pPoint ppa,ppb,p1,p2,p3;
