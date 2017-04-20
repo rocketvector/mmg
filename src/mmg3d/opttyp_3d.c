@@ -578,42 +578,56 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
             }
           } /*end noinsert*/
 
-          ier = _MMG3D_swpalmostall(mesh,met,octree,k,item[0]);
-          if(ddebug) printf("on swp2 %d ?\n",ier);
+          if ( !mesh->info.noswap ) {
+            ier = _MMG3D_swpalmostall(mesh,met,octree,k,item[0]);
+            if(ddebug) printf("on swp2 %d ?\n",ier);
 
-          if(ier > 0) {
-            nd++;
-            ds[ityp]++;
-            break;
+            if(ier > 0) {
+              nd++;
+              ds[ityp]++;
+              break;
+            }
           }
-          ier = _MMG3D_splitalmostall(mesh,met,octree,k,item[0]);
-          if(ddebug) printf("on split2 %d ?\n",ier);
 
-          if(ier > 0) {
-            nd++;
-            ds[ityp]++;
-            break;
+          if ( !mesh->info.noinsert ) {
+            ier = _MMG3D_splitalmostall(mesh,met,octree,k,item[0]);
+            if(ddebug) printf("on split2 %d ?\n",ier);
+
+            if(ier > 0) {
+              nd++;
+              ds[ityp]++;
+              break;
+            }
           }
         }
-        for(i=0 ; i<4 ; i++) {
-          if(((met->size!=1) && _MMG3D_movv_ani(mesh,met,k,i)) || ((met->size==1) && _MMG3D_movv_iso(mesh,met,k,i))) {
-            nd++;
-            ds[ityp]++;
-            break;
+
+        if ( !mesh->info.nomove ) {
+          for(i=0 ; i<4 ; i++) {
+            if( ( (met->size!=1) && _MMG3D_movv_ani(mesh,met,k,i) )
+                || ((met->size==1) && _MMG3D_movv_iso(mesh,met,k,i) ) ) {
+              nd++;
+              ds[ityp]++;
+              break;
+            }
           }
         }
         break;
       case 2: /*chapeau*/
-        if(((met->size!=1) && _MMG3D_movv_ani(mesh,met,k,item[0])) || ((met->size==1) && _MMG3D_movv_iso(mesh,met,k,item[0]))) {
-          nd++;
-          ds[ityp]++;
-        } else {
-          for(i=0 ; i<4 ; i++) {
-            if(item[0]==i) continue;
-            if(((met->size!=1) && _MMG3D_movv_ani(mesh,met,k,i)) || ((met->size==1) && _MMG3D_movv_iso(mesh,met,k,i))) {
-              nd++;
-              ds[ityp]++;
-              break;
+
+        if ( !mesh->info.nomove ) {
+          if( ((met->size!=1) && _MMG3D_movv_ani(mesh,met,k,item[0]) )
+              || ((met->size==1) && _MMG3D_movv_iso(mesh,met,k,item[0]) ) ) {
+            nd++;
+            ds[ityp]++;
+          } else {
+            for(i=0 ; i<4 ; i++) {
+              if(item[0]==i) continue;
+              if( ((met->size!=1) && _MMG3D_movv_ani(mesh,met,k,i))
+                  || ((met->size==1) && _MMG3D_movv_iso(mesh,met,k,i) ) ) {
+                nd++;
+                ds[ityp]++;
+                break;
+              }
             }
           }
         }
@@ -624,7 +638,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
     /*  for (k=0; k<=7; k++) */
     /*    if ( cs[k] ) */
     /*    printf("  optim [%d]      = %5d   %5d  %6.2f %%\n",k,cs[k],ds[k],100.0*ds[k]/cs[k]); */
-    
+
     ntot += nd;
   } while (nd && it++<maxit);
 
