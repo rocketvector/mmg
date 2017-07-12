@@ -171,7 +171,7 @@ ADD_AND_INSTALL_EXECUTABLE ( ${PROJECT_NAME}3d
 #####
 ###############################################################################
 OPTION ( SAVE_STATS "Enable/Disable the saving of the stats of the resulting
-  mesh in the stat.res file " OFF )
+  mesh in the stat_*.txt files " OFF )
 
 IF ( SAVE_STATS )
   SET(CMAKE_C_FLAGS "-DSAVE_STATS ${CMAKE_C_FLAGS}")

@@ -298,9 +298,8 @@ int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp, FILE *inm) {
 #ifdef SAVE_STATS
   if ( inm ) {
     fprintf(inm,"\t %d\t %8.6f\t %8.6f\t %12.10f",ned,lmax,avlen,lmin);
-    fprintf(inm,"\t %5.2f",100.*(hl[0]/(float)ned));
     for (k=0; k<9; k++) {
-      fprintf(stdout,"\t %5.2f",100.*(hl[k]/(float)ned));
+      fprintf(inm,"\t %5.2f",100.*(hl[k]/(float)ned));
     }
   }
 #endif
@@ -609,7 +608,7 @@ int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met, FILE *inm) {
 
 #ifdef SAVE_STATS
   if ( inm ) {
-    for (i=0; i<6; i++) {
+    for (i=0; i<5; i++) {
       fprintf(inm,"\t %6.2f",100.*(his[i]/(float)(mesh->ne-nex)));
     }
   }
