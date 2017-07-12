@@ -587,7 +587,8 @@ int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met, FILE *inm) {
 
 #ifdef SAVE_STATS
   if ( inm )
-    fprintf(inm,"\t %8.6f\t %8.6f\t %12.10f", rapmax,rapavg / (mesh->ne-nex),rapmin);
+    fprintf(inm,"\t %d\t %8.6f\t %8.6f\t %12.10f",mesh->ne-nex,
+            rapmax,rapavg / (mesh->ne-nex),rapmin);
 #endif
 
   if ( abs(mesh->info.imprim) >= 3 ){
