@@ -1033,7 +1033,7 @@ _MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree) {
 
 #ifdef DEBUG
   fprintf(stdout,"$$$$$$$$$$$$$$$$$$ INITIAL SWAP %7d\n",nnf);
-  _MMG3D_outqua(mesh,met);
+  _MMG3D_outqua(mesh,met,NULL);
 #endif
 
   /* Iterative mesh modifications */
@@ -1139,7 +1139,7 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
 
 #ifdef DEBUG
   puts("---------------------------Fin anatet---------------------");
-  _MMG3D_outqua(mesh,met);
+  _MMG3D_outqua(mesh,met,NULL);
 #endif
 
   /* renumerotation if available */
@@ -1168,7 +1168,7 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
 
 #ifdef DEBUG
   puts("---------------------Fin adptet-----------------");
-  _MMG3D_outqua(mesh,met);
+  _MMG3D_outqua(mesh,met,NULL);
 #endif
   /* in test phase: check if no element with 2 bdry faces */
   if ( !_MMG5_chkfemtopo(mesh) ) {

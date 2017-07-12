@@ -181,12 +181,14 @@ inline double _MMG5_caltet33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
  * \param met pointer toward the metric structure.
  * \param metRidTyp Type of storage of ridges metrics: 0 for classic storage,
  * 1 for special storage.
+ * \param inm FILE pointer toward the stat.res file
+ *
  * \return 0 if fail, 1 otherwise.
  *
  * Compute sizes of edges of the mesh, and displays histo.
  *
  */
-int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
+int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp, FILE *inm) {
   MMG5_pTetra     pt;
   MMG5_pPoint     ppt;
   _MMG5_Hash      hash;
@@ -287,9 +289,22 @@ int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
     }
   }
 
-  /* Display histogram */
-  _MMG5_displayHisto(mesh, ned, &avlen, amin, bmin, lmin,
-                     amax, bmax, lmax,nullEdge, &bd[0], &hl[0]);
+  if ( mesh->info.imprim > 4 ) {
+    /* Display histogram */
+    _MMG5_displayHisto(mesh, ned, &avlen, amin, bmin, lmin,
+                       amax, bmax, lmax,nullEdge, &bd[0], &hl[0]);
+  }
+
+#ifdef SAVE_STATS
+  if ( inm ) {
+    fprintf(inm,"\t %d\t %8.6f\t %8.6f\t %12.10f",ned,lmax,avlen,lmin);
+    fprintf(inm,"\t %5.2f",100.*(hl[0]/(float)ned));
+    for (k=0; k<9; k++) {
+      fprintf(stdout,"\t %5.2f",100.*(hl[k]/(float)ned));
+    }
+  }
+#endif
+
 
   _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
   return(1);
@@ -491,13 +506,14 @@ int _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
+ * \param inm FILE pointer toward the stat.res file.
  *
  * \return 0 if the worst element has a nul quality, 1 otherwise.
  *
  * Print histogram of mesh qualities for special storage of metric at ridges.
  *
  */
-int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
+int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met, FILE *inm) {
   MMG5_pTetra    pt;
   MMG5_pPoint    ppt;
   double   rap,rapmin,rapmax,rapavg,med,good;
@@ -569,6 +585,11 @@ int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
           _MMG3D_indPt(mesh,mesh->tetra[iel].v[2]),_MMG3D_indPt(mesh,mesh->tetra[iel].v[3]));
 #endif
 
+#ifdef SAVE_STATS
+  if ( inm )
+    fprintf(inm,"\t %8.6f\t %8.6f\t %12.10f", rapmax,rapavg / (mesh->ne-nex),rapmin);
+#endif
+
   if ( abs(mesh->info.imprim) >= 3 ){
 
     /* print histo */
@@ -584,6 +605,14 @@ int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
       if(nrid) fprintf(stdout,"\n  ## WARNING: %d TETRA WITH 4 RIDGES POINTS\n",nrid);
     }
   }
+
+#ifdef SAVE_STATS
+  if ( inm ) {
+    for (i=0; i<6; i++) {
+      fprintf(inm,"\t %6.2f",100.*(his[i]/(float)(mesh->ne-nex)));
+    }
+  }
+#endif
 
   return ( _MMG5_minQualCheck(iel,rapmin,_MMG3D_ALPHAD) );
 }

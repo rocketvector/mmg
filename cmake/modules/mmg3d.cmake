@@ -166,6 +166,19 @@ ADD_AND_INSTALL_EXECUTABLE ( ${PROJECT_NAME}3d
 
 ###############################################################################
 #####
+#####         Create a file containing info about the resulting mesh for
+#####         advanced post-treatment
+#####
+###############################################################################
+OPTION ( SAVE_STATS "Enable/Disable the saving of the stats of the resulting
+  mesh in the stat.res file " OFF )
+
+IF ( SAVE_STATS )
+  SET(CMAKE_C_FLAGS "-DSAVE_STATS ${CMAKE_C_FLAGS}")
+ENDIF ( )
+
+###############################################################################
+#####
 #####         Continuous integration
 #####
 ###############################################################################

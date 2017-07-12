@@ -522,6 +522,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   mytime    ctim[TIMEMAX];
   char      stim[32];
   int       final_nei;
+  FILE*     inm=NULL;
 
   if ( mesh->info.imprim ) {
     fprintf(stdout,"\n  -- MMG3d, Release %s (%s) \n",MG_VER,MG_REL);
@@ -652,7 +653,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
     _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
   }
 
-  if ( mesh->info.imprim > 1 && met->m ) _MMG3D_prilen(mesh,met,0);
+  if ( mesh->info.imprim > 1 && met->m ) _MMG3D_prilen(mesh,met,0,inm);
 
   chrono(OFF,&(ctim[2]));
   printim(ctim[2].gdif,stim);
@@ -700,17 +701,47 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"\n  %s\n   END OF MODULE MMG3d: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
   }
 
+#ifdef SAVE_STATS
+  int  exist=0;
+
+  if ( (inm = fopen("stats_remesh.res","r")) ) {
+    exist=1;
+    fclose(inm);
+  }
+  if( !(inm = fopen("stats_remesh.res","a") ) )
+    printf("  ## WARNING: UNABLE TO OPEN THE stat_remesh.res FILE\n" );
+  else {
+    if ( !exist ) {
+      puts("file creation");
+      fprintf(inm,"\t output file name\t timer\t #elt\t best qual\t mean qual\t"
+              " wrst qual\t %% s.t. 0<q<0.2\t"
+              " %% s.t. 0.2<q<0.4\t 0.4<q<0.6\t"
+              " %% s.t. 0.6<q<0.8\t 0.8<q<1\t"
+              " #edges\t largest\t mean\t smallest\t"
+              " %% s.t. 0<l<0.3\t %% s.t. 0.3<l<0.6\t %% s.t. 0.6<l<0.7071\t"
+              " %% s.t. 0.7071<l<0.9\t %% s.t. 0.9<l<1.3\t %% s.t. 1.3<l<1.4142\t"
+            " %% s.t. 1.4142<l<2.\t 2<l<5\t"
+              " %% s.t. l>5\t %%remeshed\n");
+    }
+    fprintf(inm,"\t %s\t %s",mesh->nameout,stim);
+  }
+#endif
+
   /* save file */
-  if ( !_MMG3D_outqua(mesh,met) ) {
+  if ( !_MMG3D_outqua(mesh,met,inm) ) {
     if ( !_MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
     _MMG5_RETURN_AND_PACK(mesh,met,NULL,MMG5_LOWFAILURE);
   }
 
-  if ( mesh->info.imprim > 4 ) {
-    _MMG3D_prilen(mesh,met,1);
-    final_nei = MMG3D_countInitTetra(mesh);
-    printf("\n  -- NUMBER OF NON REMESHED TETRA %d/%d (%6.2f %%)\n",
-           final_nei,mesh->nei,(double)final_nei/(double)mesh->nei*100.);
+  _MMG3D_prilen(mesh,met,1,inm);
+
+  final_nei = MMG3D_countInitTetra(mesh);
+  printf("\n  -- NUMBER OF NON REMESHED TETRA %d/%d (%6.2f %%)\n",
+         final_nei,mesh->nei,(double)final_nei/(double)mesh->nei*100.);
+
+  if ( inm ) {
+    fprintf(inm,"\t %6.2f\n", (double)final_nei/(double)mesh->nei*100.);
+    fclose(inm);
   }
 
   chrono(ON,&(ctim[1]));
@@ -729,6 +760,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
 int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
   mytime    ctim[TIMEMAX];
   char      stim[32];
+  FILE      *inm=NULL;
 
   if ( mesh->info.imprim ) {
     fprintf(stdout,"  -- MMG3d, Release %s (%s) \n",MG_VER,MG_REL);
@@ -876,8 +908,29 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"\n  %s\n   END OF MODULE MMG3d: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
   }
 
+#ifdef SAVE_STATS
+  int  exist=0;
+
+  if ( (inm = fopen("stats_ls.res","r")) ) {
+    exist=1;
+    fclose(inm);
+  }
+  if( !(inm = fopen("stats_ls.res","a") ) )
+    printf("  ## WARNING: UNABLE TO OPEN THE stats_ls.res FILE\n" );
+  else {
+    if ( !exist ) {
+      puts("file creation");
+      fprintf(inm,"\t output file name\t timer\t #elt\t best qual\t mean qual\t"
+              " wrst qual\t %% s.t. 0<q<0.2\t"
+              " %% s.t. 0.2<q<0.4\t 0.4<q<0.6\t"
+              " %% s.t. 0.6<q<0.8\t 0.8<q<1\t");
+    }
+    fprintf(inm,"\t %s\t %s",mesh->nameout,stim);
+  }
+#endif
+
   /* save file */
-  if ( !_MMG3D_outqua(mesh,met) ) {
+  if ( !_MMG3D_outqua(mesh,met,inm) ) {
     if ( !_MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
     _MMG5_RETURN_AND_PACK(mesh,met,NULL,MMG5_LOWFAILURE);
   }
@@ -899,6 +952,7 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
 int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
   mytime    ctim[TIMEMAX];
   char      stim[32];
+  FILE      *inm=NULL;
 
   if ( mesh->info.imprim ) {
     fprintf(stdout,"  -- MMG3d, Release %s (%s) \n",MG_VER,MG_REL);
@@ -1012,7 +1066,7 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
     _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
   }
 
-  if ( mesh->info.imprim > 4 && !mesh->info.iso && met->m ) _MMG3D_prilen(mesh,met,0);
+  if ( mesh->info.imprim > 4 && !mesh->info.iso && met->m ) _MMG3D_prilen(mesh,met,0,inm);
 
   chrono(OFF,&(ctim[2]));
   printim(ctim[2].gdif,stim);
@@ -1058,8 +1112,28 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
     fprintf(stdout,"\n  %s\n   END OF MODULE MMG3D: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
   }
 
+#ifdef SAVE_STATS
+  int  exist=0;
+
+  if ( (inm = fopen("stats_mov.res","r")) ) {
+    exist=1;
+    fclose(inm);
+  }
+  if( !(inm = fopen("stats_mov.res","a") ) )
+    printf("  ## WARNING: UNABLE TO OPEN THE stat_mov.res FILE\n" );
+  else {
+    if ( !exist ) {
+      fprintf(inm,"\t output file name\t timer\t #elt\t best qual\t mean qual\t"
+              " wrst qual\t %% s.t. 0<q<0.2\t"
+              " %% s.t. 0.2<q<0.4\t 0.4<q<0.6\t"
+              " %% s.t. 0.6<q<0.8\t 0.8<q<1\t");
+    }
+    fprintf(inm,"\t %s\t %s",mesh->nameout,stim);
+  }
+#endif
+
   /* save file */
-  if ( !_MMG3D_outqua(mesh,met) ) {
+  if ( !_MMG3D_outqua(mesh,met,inm) ) {
     if ( !_MMG5_unscaleMesh(mesh,met) ) {
       disp->npi = disp->np;
       _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
@@ -1068,7 +1142,7 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
   }
 
   if ( mesh->info.imprim > 1 && !mesh->info.iso )
-    _MMG3D_prilen(mesh,met,1);
+    _MMG3D_prilen(mesh,met,1,inm);
 
   chrono(ON,&(ctim[1]));
   if ( mesh->info.imprim )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
