@@ -161,6 +161,7 @@ int _MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, int
   p0->c[2] = ppt0->c[2];
   for (k=0; k<ilist; k++) {
     (&mesh->tetra[list[k]/4])->qual=callist[k];
+    (&mesh->tetra[list[k]/4])->info=0;
   }
 
   _MMG5_SAFE_FREE(callist);
@@ -1006,7 +1007,7 @@ int _MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
 
   for( l=0 ; l<ilistv ; l++ ){
     (&mesh->tetra[listv[l]/4])->qual = callist[l];
-    (&mesh->tetra[listv[l]/4])->qual = 0;
+    (&mesh->tetra[listv[l]/4])->info = 0;
   }
   _MMG5_SAFE_FREE(callist);
   return(1);
