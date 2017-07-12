@@ -712,7 +712,6 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
     printf("  ## WARNING: UNABLE TO OPEN THE stat_remesh.txt FILE\n" );
   else {
     if ( !exist ) {
-      puts("file creation");
       fprintf(inm,"\t output file name\t timer\t #elt\t best qual\t mean qual\t"
               " wrst qual\t %% s.t. 0<q<0.2\t"
               " %% s.t. 0.2<q<0.4\t %% s.t. 0.4<q<0.6\t"
@@ -723,7 +722,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
               " %% s.t. 1.4142<l<2.\t %% s.t 2<l<5\t"
               " %% s.t. l>5\t %% non remeshed\n");
     }
-    fprintf(inm,"\t %s\t %s",mesh->nameout,stim);
+    fprintf(inm,"\t %s\t %8.3lf",mesh->nameout,ctim[3].gdif);
   }
 #endif
 
