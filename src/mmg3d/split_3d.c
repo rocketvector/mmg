@@ -238,6 +238,9 @@ nextstep1:
     pt->qual=_MMG5_orcal(mesh,met,k);
     pt1->qual=_MMG5_orcal(mesh,met,iel);
   }
+  pt->info = 0;
+  pt1->info = 0;
+
   return 1;
 }
 /**
@@ -788,6 +791,8 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
       pt->qual=_MMG5_orcal(mesh,met,iel);
       pt1->qual=_MMG5_orcal(mesh,met,jel);
     }
+    pt->info = 0;
+    pt1->info = 0;
 
     _MMG5_SAFE_FREE(newtet);
     return(1);
@@ -1084,6 +1089,7 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
       pt->qual=_MMG5_orcal(mesh,met,iel);
       pt1->qual=_MMG5_orcal(mesh,met,jel);
     }
+    pt->info = pt1->info = 0;
   }
 
   _MMG5_SAFE_FREE(newtet);
@@ -1417,6 +1423,8 @@ int _MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp)
     pt[1]->qual=_MMG5_orcal(mesh,met,newtet[1]);
     pt[2]->qual=_MMG5_orcal(mesh,met,newtet[2]);
   }
+  pt[0]->info = pt[1]->info = pt[2]->info = 0;
+
   return 1;
 }
 
@@ -1628,6 +1636,8 @@ int _MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
     pt[2]->qual=_MMG5_orcal(mesh,met,newtet[2]);
     pt[3]->qual=_MMG5_orcal(mesh,met,newtet[3]);
   }
+  pt[0]->info = pt[1]->info = pt[2]->info = pt[3]->info = 0;
+
   return 1;
 }
 
@@ -1898,6 +1908,8 @@ int _MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
     pt[2]->qual=_MMG5_orcal(mesh,met,newtet[2]);
     pt[3]->qual=_MMG5_orcal(mesh,met,newtet[3]);
   }
+  pt[0]->info = pt[1]->info = pt[2]->info = pt[3]->info = 0;
+
   return 1;
 }
 
@@ -2260,6 +2272,8 @@ int _MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTy
     pt[2]->qual=_MMG5_orcal(mesh,met,newtet[2]);
     pt[3]->qual=_MMG5_orcal(mesh,met,newtet[3]);
   }
+  pt[0]->info = pt[1]->info = pt[2]->info = pt[3]->info = 0;
+
   return 1;
 }
 
@@ -2835,6 +2849,9 @@ int _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRidT
       pt[4]->qual=_MMG5_orcal(mesh,met,newtet[4]);
     }
   }
+  pt[0]->info = pt[1]->info = pt[2]->info = pt[3]->info = 0;
+  if ( !((imin12 == ip1) && (imin03 == ip3)) ) pt[4]->info = 0;
+
   return 1;
 }
 
@@ -3101,6 +3118,7 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k,char metRidTyp) {
     pt[2]->qual=_MMG5_orcal(mesh,met,newtet[2]);
     pt[3]->qual=_MMG5_orcal(mesh,met,newtet[3]);
   }
+  pt[0]->info = pt[1]->info = pt[2]->info = pt[3]->info = 0;
 
   return(ib);
 }
@@ -3393,11 +3411,13 @@ int _MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp)
   if ( (!metRidTyp) && met->m && met->size>1 ) {
     for (i=0; i<6; i++) {
       pt[i]->qual=_MMG5_caltet33_ani(mesh,met,pt[i]);
+      pt[i]->info = 0;
     }
   }
   else {
     for (i=0; i<6; i++) {
       pt[i]->qual=_MMG5_orcal(mesh,met,newtet[i]);
+      pt[i]->info = 0;
     }
   }
   return 1;
@@ -3663,11 +3683,13 @@ int _MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp)
   if ( (!metRidTyp) && met->m && met->size>1 ) {
     for (i=0; i<6; i++) {
       pt[i]->qual=_MMG5_caltet33_ani(mesh,met,pt[i]);
+      pt[i]->info = 0;
     }
   }
   else {
     for (i=0; i<6; i++) {
       pt[i]->qual=_MMG5_orcal(mesh,met,newtet[i]);
+      pt[i]->info = 0;
     }
   }
   return 1;
@@ -3932,11 +3954,13 @@ int _MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
   if ( (!metRidTyp) && met->m && met->size>1 ) {
     for (i=0; i<7; i++) {
       pt[i]->qual=_MMG5_caltet33_ani(mesh,met,pt[i]);
+      pt[i]->info = 0;
     }
   }
   else {
     for (i=0; i<7; i++) {
       pt[i]->qual=_MMG5_orcal(mesh,met,newtet[i]);
+      pt[i]->info = 0;
     }
   }
   return 1;
@@ -4308,11 +4332,13 @@ int _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
   if ( (!metRidTyp) && met->m && met->size>1 ) {
     for (i=0; i<8; i++) {
       pt[i]->qual=_MMG5_caltet33_ani(mesh,met,pt[i]);
+      pt[i]->info = 0;
     }
   }
   else {
     for (i=0; i<8; i++) {
       pt[i]->qual=_MMG5_orcal(mesh,met,newtet[i]);
+      pt[i]->info = 0;
     }
   }
   return 1;

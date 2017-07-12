@@ -327,6 +327,7 @@ typedef struct {
                  the tetrahedron*/
   int      flag;
   int16_t  tag;
+  char     info;
 } MMG5_Tetra;
 typedef MMG5_Tetra * MMG5_pTetra;
 

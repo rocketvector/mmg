@@ -498,9 +498,27 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   return(1);
 }
 
+/**
+ * \param mesh pointer toward the mesh
+ * \return nei number of tetra that were present in the initial mesh
+ *
+ * Count the tetra that were present in the initial mesh
+ *
+ */
+static inline int MMG3D_countInitTetra(MMG5_pMesh mesh) {
+  int k,nei;
+
+  nei = 0;
+  for ( k=0; k<=mesh->ne; ++k ) {
+    if ( mesh->tetra[k].info==1 ) ++nei;
+  }
+  return nei;
+}
+
 int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   mytime    ctim[TIMEMAX];
   char      stim[32];
+  int       final_nei;
 
   if ( mesh->info.imprim ) {
     fprintf(stdout,"\n  -- MMG3d, Release %s (%s) \n",MG_VER,MG_REL);
@@ -685,8 +703,12 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
     _MMG5_RETURN_AND_PACK(mesh,met,NULL,MMG5_LOWFAILURE);
   }
 
-  if ( mesh->info.imprim > 4 )
+  if ( mesh->info.imprim > 4 ) {
     _MMG3D_prilen(mesh,met,1);
+    final_nei = MMG3D_countInitTetra(mesh);
+    printf("\n  -- NUMBER OF NON REMESHED TETRA %d/%d (%6.2f %%)\n",
+           final_nei,mesh->nei,(double)final_nei/(double)mesh->nei*100.);
+  }
 
   chrono(ON,&(ctim[1]));
   if ( mesh->info.imprim )  fprintf(stdout,"\n  -- MESH PACKED UP\n");

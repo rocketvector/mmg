@@ -637,6 +637,23 @@ static int _MMG3D_nmgeom(MMG5_pMesh mesh){
   return 1;
 }
 
+/**
+ * \param mesh pointer toward the mesh
+ *
+ * Mark the tetra present in the initial mesh
+ *
+ */
+static inline void MMG3D_markInitTetra(MMG5_pMesh mesh) {
+  int k;
+
+  mesh->nei = 0;
+  for ( k=0; k<=mesh->ne; ++k ) {
+    mesh->tetra[k].info=1;
+    ++mesh->nei;
+  }
+  return;
+}
+
 /** preprocessing stage: mesh analysis */
 int _MMG3D_analys(MMG5_pMesh mesh) {
   _MMG5_Hash hash;
@@ -644,6 +661,9 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
   /**--- stage 1: data structures for surface */
   if ( abs(mesh->info.imprim) > 3 )
     fprintf(stdout,"  ** SURFACE ANALYSIS\n");
+
+  /* mark the tetra present in the initial mesh */
+  MMG3D_markInitTetra(mesh);
 
   /* create tetra adjacency */
   if ( !MMG3D_hashTetra(mesh,1) ) {

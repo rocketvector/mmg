@@ -660,6 +660,7 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
 
   for(l=0; l<ilistv; l++){
     (&mesh->tetra[listv[l]/4])->qual= callist[l];
+    (&mesh->tetra[listv[l]/4])->info= 0;
   }
   _MMG5_SAFE_FREE(callist);
   return(1);
@@ -1005,6 +1006,7 @@ int _MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
 
   for( l=0 ; l<ilistv ; l++ ){
     (&mesh->tetra[listv[l]/4])->qual = callist[l];
+    (&mesh->tetra[listv[l]/4])->qual = 0;
   }
   _MMG5_SAFE_FREE(callist);
   return(1);
@@ -1349,6 +1351,7 @@ int _MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, 
 
   for(l=0; l<ilistv; l++){
     (&mesh->tetra[listv[l]/4])->qual = callist[l];
+    (&mesh->tetra[listv[l]/4])->info = 0;
   }
   _MMG5_SAFE_FREE(callist);
   return(1);
@@ -1705,6 +1708,7 @@ int _MMG5_movbdyridpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
 
   for(l=0; l<ilistv; l++){
     (&mesh->tetra[listv[l]/4])->qual = callist[l];
+    (&mesh->tetra[listv[l]/4])->info = 0;
   }
   _MMG5_SAFE_FREE(callist);
   return(1);

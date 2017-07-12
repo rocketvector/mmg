@@ -125,6 +125,7 @@ int _MMG3D_delElt(MMG5_pMesh mesh,int iel) {
   }
   memset(pt,0,sizeof(MMG5_Tetra));
   pt->v[3] = mesh->nenil;
+  pt->info = 0;
   iadr = 4*(iel-1) + 1;
   if ( mesh->adja )
     memset(&mesh->adja[iadr],0,4*sizeof(int));
