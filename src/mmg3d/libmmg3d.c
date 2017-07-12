@@ -510,6 +510,9 @@ static inline int MMG3D_countInitTetra(MMG5_pMesh mesh) {
 
   nei = 0;
   for ( k=0; k<=mesh->ne; ++k ) {
+
+    if ( !MG_EOK(&mesh->tetra[k]) )  continue;
+
     if ( mesh->tetra[k].info==1 ) ++nei;
   }
   return nei;

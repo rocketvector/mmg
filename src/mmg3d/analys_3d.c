@@ -648,6 +648,9 @@ static inline void MMG3D_markInitTetra(MMG5_pMesh mesh) {
 
   mesh->nei = 0;
   for ( k=0; k<=mesh->ne; ++k ) {
+
+    if ( !MG_EOK(&mesh->tetra[k]) ) continue;
+
     mesh->tetra[k].info=1;
     ++mesh->nei;
   }
