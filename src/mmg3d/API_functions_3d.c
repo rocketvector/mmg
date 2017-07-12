@@ -86,7 +86,7 @@ void MMG3D_Init_parameters(MMG5_pMesh mesh) {
   /* MMG3D_IPARAM_lag = -1 */
   mesh->info.lag      = -1;
   /* MMG3D_IPARAM_fem = 0 */
-  mesh->info.fem      = 0;
+  mesh->info.fem      = 1;
   /* MMG3D_IPARAM_optim = 0 */
   mesh->info.optim    =  0;
   /* MMG3D_IPARAM_optimLES = 0 */
