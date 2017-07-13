@@ -924,7 +924,7 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
               " %% s.t. 0.2<q<0.4\t %% s.t. 0.4<q<0.6\t"
               " %% s.t. 0.6<q<0.8\t %% s.t. 0.8<q<1\t");
     }
-    fprintf(inm,"\t %s\t %s",mesh->nameout,stim);
+    fprintf(inm,"\t %s\t %8.3lf",mesh->nameout,ctim[3].gdif);
   }
 #endif
 
@@ -1127,7 +1127,7 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
               " %% s.t. 0.2<q<0.4\t %% s.t. 0.4<q<0.6\t"
               " %% s.t. 0.6<q<0.8\t %% s.t. 0.8<q<1\t");
     }
-    fprintf(inm,"\t %s\t %s",mesh->nameout,stim);
+    fprintf(inm,"\t %s\t %8.3lf",mesh->nameout,ctim[3].gdif);
   }
 #endif
 
