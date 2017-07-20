@@ -199,8 +199,8 @@ int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp, FILE *inm) {
   //{0.0, 0.2, 0.5, 0.7071, 0.9, 1.111, 1.4142, 2.0, 5.0};
 
 #ifdef SAVE_STATS
-  static double   sharpBd[16]={0.,0.15,0.3,0.45,0.6,0.7071,0.80355,0.9,1.1,1.3,
-                               1.3571,1.4142,1.7071,2.,3.5,5.};
+  static double   sharpBd[16]={0.,0.15,0.3,0.45,0.6,0.7,0.8,0.9,1.,1.1,1.2,1.3,
+                               1.4,1.55,1.7,2.};
   double          step;
   int             sharpHl[16],nspan=16;
   memset(sharpHl,0,nspan*sizeof(int));
@@ -321,7 +321,7 @@ int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp, FILE *inm) {
 
 #ifdef SAVE_STATS
   if ( inm ) {
-    fprintf(inm,"\t %d\t %8.6f\t %8.6f\t %12.10f",ned,lmax,avlen/ned,lmin);
+    fprintf(inm,"\t %d\t %8.6f\t %8.6f\t %12.10f",ned,lmax,avlen,lmin);
     for (i=0; i<nspan; i++) {
       fprintf(inm,"\t %6.2f",100.*(sharpHl[i]/(float)(ned)));
     }

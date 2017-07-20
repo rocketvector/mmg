@@ -712,8 +712,8 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
     printf("  ## WARNING: UNABLE TO OPEN THE stat_remesh.txt FILE\n" );
   else {
     if ( !exist ) {
-      static double   sharpBd[16]={0.,0.15,0.3,0.45,0.6,0.7071,0.80355,0.9,1.1,
-                                   1.3,1.3571,1.4142,1.7071,2.,3.5,5.};
+      static double  sharpBd[16]={0.,0.15,0.3,0.45,0.6,0.7,0.8,0.9,1.,1.1,1.2,1.3,
+                                  1.4,1.55,1.7,2.};
       fprintf(inm,"\t output file name\t timer\t #elt\t best qual\t mean qual\t"
               " wrst qual\t 0.\t 0.05\t 0.1\t 0.15\t 0.2\t 0.25\t 0.3\t 0.35\t"
               " 0.4\t 0.45\t 0.5\t 0.55\t 0.6\t 0.65\t 0.7\t 0.75\t 0.8\t"
