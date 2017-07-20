@@ -198,6 +198,17 @@ int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp, FILE *inm) {
   static double   bd[9]= {0.0, 0.3, 0.6, 0.7071, 0.9, 1.3, 1.4142, 2.0, 5.0};
   //{0.0, 0.2, 0.5, 0.7071, 0.9, 1.111, 1.4142, 2.0, 5.0};
 
+#ifdef SAVE_STATS
+  static double   sharpBd[16]={0.,0.15,0.3,0.45,0.6,0.7071,0.80355,0.9,1.1,1.3,
+                               1.3571,1.4142,1.7071,2.,3.5,5.};
+  double          step;
+  int             sharpHl[16],nspan=16;
+  memset(sharpHl,0,nspan*sizeof(int));
+
+  step = 2./(nspan-1);
+  for ( k=0; k<nspan; ++k ) sharpBd[k] = ( (double)k ) * step;
+#endif
+
   memset(hl,0,9*sizeof(int));
   ned = 0;
   avlen = 0.0;
@@ -284,6 +295,19 @@ int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp, FILE *inm) {
             }
           }
           if( i == 8 ) hl[8]++;
+
+#ifdef SAVE_STATS
+          if ( inm ) {
+            /* Locate size of edge among given table */
+            for(i=0; i<nspan-1; i++) {
+              if ( sharpBd[i] <= len && len < sharpBd[i+1] ) {
+                sharpHl[i]++;
+                break;
+              }
+            }
+            if( i == nspan-1 ) sharpHl[i]++;
+          }
+#endif
         }
       }
     }
@@ -297,9 +321,9 @@ int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp, FILE *inm) {
 
 #ifdef SAVE_STATS
   if ( inm ) {
-    fprintf(inm,"\t %d\t %8.6f\t %8.6f\t %12.10f",ned,lmax,avlen,lmin);
-    for (k=0; k<9; k++) {
-      fprintf(inm,"\t %5.2f",100.*(hl[k]/(float)ned));
+    fprintf(inm,"\t %d\t %8.6f\t %8.6f\t %12.10f",ned,lmax,avlen/ned,lmin);
+    for (i=0; i<nspan; i++) {
+      fprintf(inm,"\t %6.2f",100.*(sharpHl[i]/(float)(ned)));
     }
   }
 #endif
@@ -607,9 +631,21 @@ int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met, FILE *inm) {
   }
 
 #ifdef SAVE_STATS
+  int sharpHis[20];
+
   if ( inm ) {
-    for (i=0; i<5; i++) {
-      fprintf(inm,"\t %6.2f",100.*(his[i]/(float)(mesh->ne-nex)));
+    for (i=0; i<20; i++) sharpHis[i] = 0;
+
+    for (k=1; k<=mesh->ne; k++) {
+      pt = &mesh->tetra[k];
+      if( !MG_EOK(pt) ) continue;
+      rap = _MMG3D_ALPHAD * pt->qual;
+      ir = MG_MIN(19,(int)(20.0*rap));
+      sharpHis[ir] += 1;
+    }
+
+    for (i=0; i<20; i++) {
+      fprintf(inm,"\t %6.2f",100.*(sharpHis[i]/(float)(mesh->ne-nex)));
     }
   }
 #endif

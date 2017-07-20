@@ -712,15 +712,15 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
     printf("  ## WARNING: UNABLE TO OPEN THE stat_remesh.txt FILE\n" );
   else {
     if ( !exist ) {
+      static double   sharpBd[16]={0.,0.15,0.3,0.45,0.6,0.7071,0.80355,0.9,1.1,
+                                   1.3,1.3571,1.4142,1.7071,2.,3.5,5.};
       fprintf(inm,"\t output file name\t timer\t #elt\t best qual\t mean qual\t"
-              " wrst qual\t %% s.t. 0<q<0.2\t"
-              " %% s.t. 0.2<q<0.4\t %% s.t. 0.4<q<0.6\t"
-              " %% s.t. 0.6<q<0.8\t %% s.t. 0.8<q<1\t"
-              " #edges\t largest\t mean\t smallest\t"
-              " %% s.t. 0<l<0.3\t %% s.t. 0.3<l<0.6\t %% s.t. 0.6<l<0.7071\t"
-              " %% s.t. 0.7071<l<0.9\t %% s.t. 0.9<l<1.3\t %% s.t. 1.3<l<1.4142\t"
-              " %% s.t. 1.4142<l<2.\t %% s.t 2<l<5\t"
-              " %% s.t. l>5\t %% non remeshed\n");
+              " wrst qual\t 0.\t 0.05\t 0.1\t 0.15\t 0.2\t 0.25\t 0.3\t 0.35\t"
+              " 0.4\t 0.45\t 0.5\t 0.55\t 0.6\t 0.65\t 0.7\t 0.75\t 0.8\t"
+              " 0.85\t 0.9\t 0.95\t"
+              " #edges\t largest\t mean\t smallest\t");
+      for ( int i=0; i<16; ++i ) fprintf(inm," %6.2f\t",sharpBd[i]);
+      fprintf(inm," # non remeshed \n");
     }
     fprintf(inm,"\t %s\t %8.3lf",mesh->nameout,ctim[3].gdif);
   }
