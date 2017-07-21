@@ -921,8 +921,7 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
       fprintf(inm,"\t output file name\t timer\t #elt\t best qual\t mean qual\t"
               " wrst qual\t 0.\t 0.05\t 0.1\t 0.15\t 0.2\t 0.25\t 0.3\t 0.35\t"
               " 0.4\t 0.45\t 0.5\t 0.55\t 0.6\t 0.65\t 0.7\t 0.75\t 0.8\t"
-              " 0.85\t 0.9\t 0.95\t"
-              " #edges\t largest\t mean\t smallest\n");
+              " 0.85\t 0.9\t 0.95\n");
     }
     fprintf(inm,"\t %s\t %8.3lf",mesh->nameout,ctim[3].gdif);
   }
