@@ -22,7 +22,7 @@ def plotQualHisto(x,y,wrst,mean,best,casename):
     ax1.set_title(casename + " element qualities")
     ax1.set_xlabel('Quality')
     ax1.set_ylabel('% Elements')
-    plt.xticks(np.arange(xmin_qual,xmax_qual,(xmax_qual-xmin_qual)/10))
+    plt.xticks(np.arange(xmin_qual,xmax_qual,(xmax_qual-xmin_qual)/10),fontsize=8)
 
     bins = []
     for i in range(len(x)):
@@ -31,7 +31,9 @@ def plotQualHisto(x,y,wrst,mean,best,casename):
 
     # plot histo
     for i in range(len(x)):
-        ax1.hist(x[i],bins[i],range=(xmin_qual,xmax_qual),weights=y[i],alpha=0.5)
+        mystr = "stat" + str(i)
+        ax1.hist(x[i],bins[i],range=(xmin_qual,xmax_qual),weights=y[i],alpha=0.5,
+                 label=mystr)
 
         # plot wrst, mean,best
         ax1.axvline(x=wrst[i], linewidth=2, color='r')
@@ -45,6 +47,7 @@ def plotQualHisto(x,y,wrst,mean,best,casename):
         ax1.annotate(mystr ,xy=(best[i]+0.01,75+i*10),color='b',fontsize=8)
 
     # save fig
+    plt.legend(loc='upper left')
     fig.savefig(casename+"_qual.png")
     plt.close()
 
@@ -64,7 +67,7 @@ def plotLenHisto(x,y,small,mean,large,casename):
 
     ax1.set_xlabel('Lengths')
     ax1.set_ylabel('% Edges')
-    plt.xticks(np.arange(xmin_len,maxlarge,(maxlarge-xmin_len)/10))
+    plt.xticks(np.arange(xmin_len,maxlarge,(maxlarge-xmin_len)/10),fontsize=8)
 
     bins = []
     for i in range(len(x)):
@@ -72,7 +75,9 @@ def plotLenHisto(x,y,small,mean,large,casename):
         bins[i].append(xmax_len)
 
     for i in range(len(x)):
-        ax1.hist(x[i],bins[i],range=(xmin_len,xmax_len),weights=y[i],alpha=0.5)
+        mystr = "stat" + str(i)
+        ax1.hist(x[i],bins[i],range=(xmin_len,xmax_len),weights=y[i],alpha=0.5,
+        label=mystr)
 
         # plot wrst, mean,best
         ax1.axvline(x=small[i], linewidth=2, color='r')
@@ -89,6 +94,7 @@ def plotLenHisto(x,y,small,mean,large,casename):
             mystr = "stat"+str(i)+":lrgst\n"+str(small[i])
             ax1.annotate(mystr,xy=(4.,75+i*10),fontsize=8)
 
+    plt.legend(loc='upper left')
     fig.savefig(casename+"_len.png")
     plt.close()
 
@@ -104,23 +110,26 @@ def plotCurve(y,dataname):
     ax1.set_ylabel(dataname)
     ax1.set_xlabel("Test cases")
 
+    plt.xticks(np.arange(0,len(y[0]),3),fontsize=8)
+
     for i in range(len(y)):
         nbtests = len(y[i])
-
-        ax1.plot(y[i])
+        mystr = "stat" + str(i)
+        ax1.plot(y[i],label=mystr)
 
         # plot mean
         mean = np.mean(y[i])
         max  = np.max(y[i])
         min  = np.min(y[i])
 
-        ax1.axhline(y=mean, linewidth=2,color='g')
+        ax1.axhline(y=mean, linewidth=2,color='r')
         mystr = "stat"+str(i)+":\n"+str(mean)
         if mean > (max-min)/2:
-            ax1.annotate(mystr,xy=(nbtests/4+i*(nbtests/4), mean-10),fontsize=12)
+            ax1.annotate(mystr,xy=(nbtests/4+i*(nbtests/4), mean),fontsize=10)
         else:
-            ax1.annotate(mystr,xy=(nbtests/4+i*(nbtests/4), mean+5),fontsize=12)
+            ax1.annotate(mystr,xy=(nbtests/4+i*(nbtests/4), mean),fontsize=10)
 
+    plt.legend(loc='upper right')
     fig.savefig(dataname+".png")
     plt.close()
 
@@ -283,7 +292,7 @@ def main (argv):
             wrst.append(wrstquallist[k][i])
             mean.append(meanquallist[k][i])
             best.append(bestquallist[k][i])
-        #plotQualHisto(xqual,y,wrst,mean,best,filelist[0][i+1])
+        plotQualHisto(xqual,y,wrst,mean,best,filelist[0][i+1])
 
         y     = []
         small = []
@@ -295,7 +304,7 @@ def main (argv):
             small.append( smallestlenlist[k][i])
             mean .append( meanlenlist[k][i])
             large.append( largestlenlist[k][i])
-        #plotLenHisto(xlen,y,small, mean, large,filelist[0][i+1])
+        plotLenHisto(xlen,y,small, mean, large,filelist[0][i+1])
 
     meanqual     = []
     meanmeanqual = []

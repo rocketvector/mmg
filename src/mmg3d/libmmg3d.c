@@ -704,11 +704,11 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
 #ifdef SAVE_STATS
   int  exist=0;
 
-  if ( (inm = fopen("stats_remesh.txt","r")) ) {
+  if ( (inm = fopen("dev-stats_remesh.txt","r")) ) {
     exist=1;
     fclose(inm);
   }
-  if( !(inm = fopen("stats_remesh.txt","a") ) )
+  if( !(inm = fopen("dev-stats_remesh.txt","a") ) )
     printf("  ## WARNING: UNABLE TO OPEN THE stat_remesh.txt FILE\n" );
   else {
     if ( !exist ) {
@@ -910,19 +910,19 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
 #ifdef SAVE_STATS
   int  exist=0;
 
-  if ( (inm = fopen("stats_ls.txt","r")) ) {
+  if ( (inm = fopen("dev-stats_ls.txt","r")) ) {
     exist=1;
     fclose(inm);
   }
-  if( !(inm = fopen("stats_ls.txt","a") ) )
+  if( !(inm = fopen("dev-stats_ls.txt","a") ) )
     printf("  ## WARNING: UNABLE TO OPEN THE stats_ls.txt FILE\n" );
   else {
     if ( !exist ) {
-      puts("file creation");
       fprintf(inm,"\t output file name\t timer\t #elt\t best qual\t mean qual\t"
-              " wrst qual\t %% s.t. 0<q<0.2\t"
-              " %% s.t. 0.2<q<0.4\t %% s.t. 0.4<q<0.6\t"
-              " %% s.t. 0.6<q<0.8\t %% s.t. 0.8<q<1\t");
+              " wrst qual\t 0.\t 0.05\t 0.1\t 0.15\t 0.2\t 0.25\t 0.3\t 0.35\t"
+              " 0.4\t 0.45\t 0.5\t 0.55\t 0.6\t 0.65\t 0.7\t 0.75\t 0.8\t"
+              " 0.85\t 0.9\t 0.95\t"
+              " #edges\t largest\t mean\t smallest\n");
     }
     fprintf(inm,"\t %s\t %8.3lf",mesh->nameout,ctim[3].gdif);
   }

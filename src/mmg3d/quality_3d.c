@@ -647,6 +647,7 @@ int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met, FILE *inm) {
     for (i=0; i<20; i++) {
       fprintf(inm,"\t %6.2f",100.*(sharpHis[i]/(float)(mesh->ne-nex)));
     }
+    if ( mesh->info.iso )  fprintf(inm,"\n");
   }
 #endif
 
