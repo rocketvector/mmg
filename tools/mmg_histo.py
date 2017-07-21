@@ -138,6 +138,9 @@ def plotCurve(y,dataname):
 # main: plot quality/length histograms for all the tests lists in
 # "stat_remesh.txt" and plot the histogram of the mean qualities/lengths of all
 # this test cases
+#
+###############################################################################
+
 def main (argv):
 
     nargs    = len(sys.argv)
@@ -181,20 +184,6 @@ def main (argv):
         tmplenlist = []
         tmpkeepedlist = []
 
-        #filelist.append([])
-        #timelist.append([])
-        #nbeltslist.append([])
-        #bestquallist.append([])
-        #meanquallist.append([])
-        #wrstquallist.append([])
-        #quallist.append([])
-        #nbedgslist.append([])
-        #largestlenlist.append([])
-        #meanlenlist.append([])
-        #smallestlenlist.append([])
-        #lenlist.append([])
-        #keepedlist.append([])
-
         for curline in lines:
             tmpfilelist.append        ( curline.strip().split("\t")[0].strip() )
             tmptimelist.append        ( curline.strip().split("\t")[1].strip() )
@@ -203,60 +192,33 @@ def main (argv):
             tmpmeanquallist.append    ( curline.strip().split("\t")[4].strip() )
             tmpwrstquallist.append    ( curline.strip().split("\t")[5].strip() )
             tmpquallist.append        ( [s.strip() for s in curline.strip().split("\t")[6:26]] )
-            tmpnbedgslist.append      ( curline.strip().split("\t")[26].strip() )
-            tmplargestlenlist.append  ( curline.strip().split("\t")[27].strip() )
-            tmpmeanlenlist.append     ( curline.strip().split("\t")[28].strip() )
-            tmpsmallestlenlist.append ( curline.strip().split("\t")[29].strip() )
-            tmplenlist.append         ( [s.strip() for s in  curline.strip().split("\t")[30:46]] )
-            tmpkeepedlist.append      ( curline.strip().split("\t")[46].strip() )
 
-            #filelist[nfile].append(        curline.strip().split("\t")[0])
-            #timelist[nfile].append(        curline.strip().split("\t")[1])
-            #nbeltslist[nfile].append(      curline.strip().split("\t")[2])
-            #bestquallist[nfile].append(    curline.strip().split("\t")[3])
-            #meanquallist[nfile].append(    curline.strip().split("\t")[4])
-            #wrstquallist[nfile].append(    curline.strip().split("\t")[5])
-            #quallist[nfile].append(        curline.strip().split("\t")[6:26])
-            #nbedgslist[nfile].append(      curline.strip().split("\t")[26])
-            #largestlenlist[nfile].append(  curline.strip().split("\t")[27])
-            #meanlenlist[nfile].append(     curline.strip().split("\t")[28])
-            #smallestlenlist[nfile].append( curline.strip().split("\t")[29])
-            #lenlist[nfile].append(         curline.strip().split("\t")[30:46])
-            #keepedlist[nfile].append(      curline.strip().split("\t")[46])
-
-            #timelist       [nfile]  = map( float, timelist[nfile][1:]        )
-            #nbeltslist     [nfile]  = map( float, nbeltslist[nfile][1:]      )
-            #bestquallist   [nfile]  = map( float, bestquallist[nfile][1:]    )
-            #meanquallist   [nfile]  = map( float, meanquallist[nfile][1:]    )
-            #wrstquallist   [nfile]  = map( float, wrstquallist[nfile][1:]    )
-            #nbedgslist     [nfile]  = map( float, nbedgslist[nfile][1:]      )
-            #largestlenlist [nfile]  = map( float, largestlenlist[nfile][1:]  )
-            #smallestlenlist[nfile]  = map( float, smallestlenlist[nfile][1:] )
-            #meanlenlist    [nfile]  = map( float, meanlenlist[nfile][1:]     )
-            #keepedlist     [nfile]  = map( float, keepedlist[nfile][1:]      )
-            #
-            #quallist[nfile][0] = map(float, quallist[nfile][0])
-            #xqual.append(quallist[nfile][0])
-            #
-            #lenlist[nfile][0] = map(float, lenlist[nfile][0])
-            #xlen.append(lenlist[nfile][0])
+            if ( file.find("stats_ls.txt") == -1 ) :
+                tmpnbedgslist.append      ( curline.strip().split("\t")[26].strip() )
+                tmplargestlenlist.append  ( curline.strip().split("\t")[27].strip() )
+                tmpmeanlenlist.append     ( curline.strip().split("\t")[28].strip() )
+                tmpsmallestlenlist.append ( curline.strip().split("\t")[29].strip() )
+                tmplenlist.append         ( [s.strip() for s in  curline.strip().split("\t")[30:46]] )
+                tmpkeepedlist.append      ( curline.strip().split("\t")[46].strip() )
 
         tmptimelist         = map( float, tmptimelist[1:]        )
         tmpnbeltslist       = map( float, tmpnbeltslist[1:]      )
         tmpbestquallist     = map( float, tmpbestquallist[1:]    )
         tmpmeanquallist     = map( float, tmpmeanquallist[1:]    )
         tmpwrstquallist     = map( float, tmpwrstquallist[1:]    )
-        tmpnbedgslist       = map( float, tmpnbedgslist[1:]      )
-        tmplargestlenlist   = map( float, tmplargestlenlist[1:]  )
-        tmpsmallestlenlist  = map( float, tmpsmallestlenlist[1:] )
-        tmpmeanlenlist      = map( float, tmpmeanlenlist[1:]     )
-        tmpkeepedlist       = map( float, tmpkeepedlist[1:]      )
 
         tmpquallist[0] = map(float, tmpquallist[0])
         tmpxqual = tmpquallist[0]
 
-        tmplenlist[0] = map(float, tmplenlist[0])
-        tmpxlen = tmplenlist[0]
+        if ( file.find("stats_ls.txt") == -1 ) :
+            tmpnbedgslist       = map( float, tmpnbedgslist[1:]      )
+            tmplargestlenlist   = map( float, tmplargestlenlist[1:]  )
+            tmpsmallestlenlist  = map( float, tmpsmallestlenlist[1:] )
+            tmpmeanlenlist      = map( float, tmpmeanlenlist[1:]     )
+            tmpkeepedlist       = map( float, tmpkeepedlist[1:]      )
+
+            tmplenlist[0] = map(float, tmplenlist[0])
+            tmpxlen = tmplenlist[0]
 
         filelist.append(        tmpfilelist )
         timelist.append(        tmptimelist )
@@ -265,17 +227,19 @@ def main (argv):
         meanquallist.append(    tmpmeanquallist )
         wrstquallist.append(    tmpwrstquallist )
         quallist.append(        tmpquallist )
-        nbedgslist.append(      tmpnbedgslist )
-        largestlenlist.append(  tmplargestlenlist )
-        meanlenlist.append(     tmpmeanlenlist )
-        smallestlenlist.append( tmpsmallestlenlist )
-        lenlist.append(         tmplenlist )
-        keepedlist.append(      tmpkeepedlist )
-
         xqual.append(tmpxqual)
-        xlen.append(tmpxlen)
+
+        if ( file.find("stats_ls.txt") == -1 ) :
+            nbedgslist.append(      tmpnbedgslist )
+            largestlenlist.append(  tmplargestlenlist )
+            meanlenlist.append(     tmpmeanlenlist )
+            smallestlenlist.append( tmpsmallestlenlist )
+            lenlist.append(         tmplenlist )
+            keepedlist.append(      tmpkeepedlist )
+            xlen.append(tmpxlen)
 
     # plot the histos for each test case
+    file = args[1]
     for i in range ( len(filelist[0])-1 ):
         repname     = str(filelist[0][i+1].split("/")[-2])
         filename    = str(filelist[0][i+1].split("/")[-1])
@@ -294,17 +258,18 @@ def main (argv):
             best.append(bestquallist[k][i])
         plotQualHisto(xqual,y,wrst,mean,best,filelist[0][i+1])
 
-        y     = []
-        small = []
-        mean  = []
-        large = []
-        for k in range(nargs-1):
-            lenlist[k][i+1]=map(float,lenlist[k][i+1])
-            y.append(lenlist[k][i+1])
-            small.append( smallestlenlist[k][i])
-            mean .append( meanlenlist[k][i])
-            large.append( largestlenlist[k][i])
-        plotLenHisto(xlen,y,small, mean, large,filelist[0][i+1])
+        if ( file.find("stats_ls.txt") == -1 ) :
+            y     = []
+            small = []
+            mean  = []
+            large = []
+            for k in range(nargs-1):
+                lenlist[k][i+1]=map(float,lenlist[k][i+1])
+                y.append(lenlist[k][i+1])
+                small.append( smallestlenlist[k][i])
+                mean .append( meanlenlist[k][i])
+                large.append( largestlenlist[k][i])
+            plotLenHisto(xlen,y,small, mean, large,filelist[0][i+1])
 
     meanqual     = []
     meanmeanqual = []
@@ -317,31 +282,44 @@ def main (argv):
         meanbestqual.append ( np.mean(bestquallist[k]) )
         meanwrstqual.append ( np.mean(wrstquallist[k]) )
 
-    plotQualHisto(xqual,meanqual,meanwrstqual,meanmeanqual,meanbestqual,"mean")
+    if ( file.find("stats_ls.txt") == -1 ) :
+        plotQualHisto(xqual,meanqual,meanwrstqual,meanmeanqual,meanbestqual,"mean")
+    else:
+        plotQualHisto(xqual,meanqual,meanwrstqual,meanmeanqual,meanbestqual,"mean_ls")
 
-    meanlen         = []
-    meanmeanlen     = []
-    meanlargestlen  = []
-    meansmallestlen = []
+    if ( file.find("stats_ls.txt") == -1 ) :
+        meanlen         = []
+        meanmeanlen     = []
+        meanlargestlen  = []
+        meansmallestlen = []
 
-    for k in range(nargs-1):
-        meanlen        .append ( np.mean(lenlist[k][1:], axis=0) )
-        meanmeanlen    .append ( np.mean(meanlenlist[k]) )
-        meanlargestlen .append ( np.mean(largestlenlist[k]) )
-        meansmallestlen.append ( np.mean(smallestlenlist[k]) )
-    plotLenHisto(xlen,meanlen,meansmallestlen,meanmeanlen,meanlargestlen,"mean")
+        for k in range(nargs-1):
+            meanlen        .append ( np.mean(lenlist[k][1:], axis=0) )
+            meanmeanlen    .append ( np.mean(meanlenlist[k]) )
+            meanlargestlen .append ( np.mean(largestlenlist[k]) )
+            meansmallestlen.append ( np.mean(smallestlenlist[k]) )
+        plotLenHisto(xlen,meanlen,meansmallestlen,meanmeanlen,meanlargestlen,"mean")
 
     # Plot curves for the other data
-    plotCurve(timelist         ,"Time")
-    plotCurve(nbeltslist       ,"Number-of-Elements")
-    plotCurve(bestquallist     ,"Best-Qualities")
-    plotCurve(meanquallist     ,"Mean-Qualities")
-    plotCurve(wrstquallist     ,"Wrst-Qualities")
-    plotCurve(nbedgslist       ,"Number-of-Edges")
-    plotCurve(largestlenlist   ,"Largest-Edges")
-    plotCurve(meanlenlist      ,"Mean-Edges")
-    plotCurve(smallestlenlist  ,"Smallest-Edges")
-    plotCurve(keepedlist       ,"Keeped-Elements")
+    if ( file.find("stats_ls.txt") == -1 ) :
+        plotCurve(timelist         ,"Time")
+        plotCurve(nbeltslist       ,"Number-of-Elements")
+        plotCurve(bestquallist     ,"Best-Qualities")
+        plotCurve(meanquallist     ,"Mean-Qualities")
+        plotCurve(wrstquallist     ,"Wrst-Qualities")
+    else:
+        plotCurve(timelist         ,"Time_ls")
+        plotCurve(nbeltslist       ,"Number-of-Elements_ls")
+        plotCurve(bestquallist     ,"Best-Qualities_ls")
+        plotCurve(meanquallist     ,"Mean-Qualities_ls")
+        plotCurve(wrstquallist     ,"Wrst-Qualities_ls")
+
+    if ( file.find("stats_ls.txt") == -1 ) :
+        plotCurve(nbedgslist       ,"Number-of-Edges")
+        plotCurve(largestlenlist   ,"Largest-Edges")
+        plotCurve(meanlenlist      ,"Mean-Edges")
+        plotCurve(smallestlenlist  ,"Smallest-Edges")
+        plotCurve(keepedlist       ,"Keeped-Elements")
 
 if __name__ == "__main__":
    main(sys.argv[1:])
