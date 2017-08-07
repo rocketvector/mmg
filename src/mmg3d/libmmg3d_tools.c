@@ -114,6 +114,8 @@ int MMG3D_usage(char *prog) {
   _MMG5_mmgUsage(prog);
 
   fprintf(stdout,"-A           enable anisotropy (without metric file).\n");
+  fprintf(stdout,"-opnbdy      preserve input triangles at the interface of"
+          " two domains of the same reference.\n");
 
 #ifdef USE_ELAS
   fprintf(stdout,"-lag [0/1/2] Lagrangian mesh displacement according to mode 0/1/2\n");
@@ -126,6 +128,7 @@ int MMG3D_usage(char *prog) {
 #endif
   fprintf(stdout,"\n");
 
+  fprintf(stdout,"-nofem       do not force Mmg to create a finite element mesh \n");
   fprintf(stdout,"-optim       mesh optimization\n");
   fprintf(stdout,"-optimLES    strong mesh optimization for LES computations\n");
   fprintf(stdout,"-noinsert    no point insertion/deletion \n");
@@ -196,12 +199,6 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           }
         }
         break;
-      case 'f':  /* fem mesh */
-        if ( !strcmp(argv[i],"-fem") ) {
-          if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_fem,1) )
-            return 0;
-        }
-        break;
       case 'h':
         if ( !strcmp(argv[i],"-hmin") && ++i < argc ) {
           if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_hmin,
@@ -247,6 +244,7 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           }
         }
         break;
+
       case 'l':
         if ( !strcmp(argv[i],"-lag") ) {
           if ( ++i < argc && isdigit(argv[i][0]) ) {
@@ -288,7 +286,11 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
         }
         break;
       case 'n':
-        if ( !strcmp(argv[i],"-nr") ) {
+        if ( !strcmp(argv[i],"-nofem") ) {
+          if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_nofem,1) )
+            return 0;
+        }
+        else if ( !strcmp(argv[i],"-nr") ) {
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_angle,0) )
             return 0;
         }
@@ -320,6 +322,10 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
             MMG3D_usage(argv[0]);
             return 0;
           }
+        }
+        else if ( !strcmp(argv[i],"-opnbdy") ) {
+          if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_opnbdy,1) )
+            return 0;
         }
 #ifndef PATTERN
         else if ( !strcmp(argv[i],"-octree") && ++i < argc ) {
@@ -579,12 +585,12 @@ int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,double critmin, double lmin,
 
   /* Check options */
   if ( mesh->info.lag > -1 ) {
-    fprintf(stderr,"  ## Error: lagrangian mode unavailable (MMG3D_IPARAM_lag):\n"
+    fprintf(stderr,"\n  ## Error: lagrangian mode unavailable (MMG3D_IPARAM_lag):\n"
             "            You must call the MMG3D_mmg3dmov function to move a rigidbody.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
   else if ( mesh->info.iso ) {
-    fprintf(stderr,"  ## Error: level-set discretisation unavailable"
+    fprintf(stderr,"\n  ## Error: level-set discretisation unavailable"
             " (MMG3D_IPARAM_iso):\n"
             "          You must call the MMG3D_mmg3dmov function to use this option.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
@@ -607,7 +613,7 @@ int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,double critmin, double lmin,
     met->np = 0;
   }
   else if ( met->size!=1 && met->size!=6 ) {
-    fprintf(stderr,"  ## ERROR: WRONG DATA TYPE.\n");
+    fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
 
@@ -700,8 +706,8 @@ int MMG3D_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
       nq = pt->v[i1];
 
       if(!_MMG5_hashEdge(mesh,&hash,np,nq,0)){
-        fprintf(stderr,"%s:%d: Error: function _MMG5_hashEdge return 0\n",
-                __FILE__,__LINE__);
+        fprintf(stderr,"\n  ## Error: %s: function _MMG5_hashEdge return 0\n",
+                __func__);
         return 0;
       }
     }

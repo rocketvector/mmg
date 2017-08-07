@@ -140,8 +140,10 @@ int _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, _MMG5_Hash *hash, int chkISO) 
           assert(ph);
 
           if ( hash->nxt >= hash->max-1 ) {
-            if ( mesh->info.ddebug )
-              fprintf(stderr,"  ## Memory alloc problem (edge): %d\n",hash->max);
+            if ( mesh->info.ddebug ) {
+              fprintf(stderr,"\n  ## Warning: %s: memory alloc problem (edge):"
+                      " %d\n",__func__,hash->max);
+            }
             _MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,0.2,_MMG5_hedge,
                                "_MMG5_edge",return(0),0);
 
@@ -220,7 +222,9 @@ int _MMG5_hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash, int a,int b,int k) {
 
     if ( hash->nxt >= hash->max-1 ) {
       if ( mesh->info.ddebug )
-        fprintf(stderr,"  ## Memory alloc problem (edge): %d\n",hash->max);
+        fprintf(stderr,"\n  ## Warning: %s: memory alloc problem (edge):"
+                " %d\n",__func__,hash->max);
+
       _MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,0.2,_MMG5_hedge,
                          "_MMG5_edge",return(0),0);
       /* ph pointer may be false after realloc */

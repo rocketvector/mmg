@@ -315,7 +315,9 @@ int _MMG2_norver(MMG5_pMesh mesh) {
       do {
         ppt->s = 1;
         if ( !_MMG2_boulen(mesh,kk,ii,&pleft,&pright,ppt->n) ) {
-          printf("Impossible to calculate normal vector at vertex %d\n",pt->v[i]);
+          fprintf(stderr,"\n  ## Error: %s: Impossible to"
+                  " calculate normal vector at vertex %d.\n",
+                  __func__,_MMG2D_indPt(mesh,pt->v[i]));
           return(0);
         }
         nn++;
@@ -335,7 +337,9 @@ int _MMG2_norver(MMG5_pMesh mesh) {
       do {
         ppt->s = 1;
         if ( !_MMG2_boulen(mesh,kk,ii,&pleft,&pright,ppt->n) ) {
-          printf("Impossible to calculate normal vector at vertex %d\n",pt->v[i]);
+          fprintf(stderr,"\n  ## Error: %s: Impossible to"
+                  " calculate normal vector at vertex %d.\n",
+                  __func__,_MMG2D_indPt(mesh,pt->v[i]));
           return(0);
         }
         nn++;
@@ -416,7 +420,7 @@ int _MMG2_regnor(MMG5_pMesh mesh) {
       ier = _MMG2_bouleendp(mesh,iel,i,&ip1,&ip2);
 
       if ( !ier ) {
-        printf("*** problem in func. _MMG2_bouleendp. Abort.\n");
+        fprintf(stderr,"\n  ## Error: %s: Abort.\n",__func__);
         _MMG5_SAFE_FREE(tmp);
         return 0;
       }
@@ -503,7 +507,7 @@ int _MMG2_regnor(MMG5_pMesh mesh) {
 
       ier = _MMG2_bouleendp(mesh,iel,i,&ip1,&ip2);
       if ( !ier ) {
-        printf("*** problem in func. _MMG2_bouleendp. Abort.\n");
+        fprintf(stderr,"\n  ## Error: %s: Abort.\n",__func__);
         _MMG5_SAFE_FREE(tmp);
         return 0;
       }
@@ -615,38 +619,38 @@ int _MMG2_regnor(MMG5_pMesh mesh) {
 int _MMG2_analys(MMG5_pMesh mesh) {
   /* Transfer the boundary edge references to the triangles, if it has not been already done (option 1) */
   if ( !MMG2_assignEdge(mesh) ) {
-    fprintf(stdout,"  ## Problem in setting boundary. Exit program.\n");
+     fprintf(stderr,"\n  ## Problem in setting boundary. Exit program.\n");
     return(0);
   }
 
   /* Creation of adjacency relations in the mesh */
   if ( !MMG2_hashTria(mesh) ) {
-    fprintf(stdout,"  ## Hashing problem. Exit program.\n");
+     fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
     return(0);
   }
 
   /* Set tags to triangles from geometric configuration */
   if ( !_MMG2_setadj(mesh) ) {
-    fprintf(stdout,"  ## Problem in function setadj. Exit program.\n");
+    fprintf(stderr,"\n  ## Problem in function setadj. Exit program.\n");
     return(0);
   }
 
   /* Identify singularities in the mesh */
   if ( !_MMG2_singul(mesh) ) {
-    fprintf(stdout,"  ## Problem in identifying singularities. Exit program.\n");
+     fprintf(stderr,"\n  ## Problem in identifying singularities. Exit program.\n");
     return(0);
   }
 
   /* Define normal vectors at vertices on curves */
   if ( !_MMG2_norver(mesh) ) {
-    fprintf(stdout,"  ## Problem in calculating normal vectors. Exit program.\n");
+     fprintf(stderr,"\n  ## Problem in calculating normal vectors. Exit program.\n");
     return(0);
   }
 
   /* Regularize normal vector field with a Laplacian / anti-laplacian smoothing */
   /*if ( !_MMG2_regnor(mesh) ) {
-    fprintf(stdout,"  ## Problem in regularizing normal vectors. Exit program.\n");
-    return(0);
+      fprintf(stderr,"\n  ## Problem in regularizing normal vectors. Exit program.\n");
+      return(0);
   }*/
 
   return(1);

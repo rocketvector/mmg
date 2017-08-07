@@ -226,7 +226,7 @@ int _MMG3D_bdryBuild(MMG5_pMesh mesh) {
   /* rebuild triangles*/
   mesh->nt = 0;
   if ( !_MMG5_chkBdryTria(mesh) ) {
-    fprintf(stderr," ## Error: unable to rebuild triangles\n");
+    fprintf(stderr,"\n  ## Error: %s: unable to rebuild triangles\n",__func__);
     return(-1);
   }
 
@@ -343,6 +343,7 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
     pt->v[2] = mesh->point[pt->v[2]].tmp;
     pt->v[3] = mesh->point[pt->v[3]].tmp;
     ne++;
+
     if ( k!=nbl ) {
       ptnew = &mesh->tetra[nbl];
       memcpy(ptnew,pt,sizeof(MMG5_Tetra));
@@ -452,7 +453,8 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
 
   /* create prism adjacency */
   if ( !MMG3D_hashPrism(mesh) ) {
-    fprintf(stderr,"  ## Prism hashing problem. Exit program.\n");
+    fprintf(stderr,"\n  ## Error: %s: prism hashing problem. Exit program.\n",
+            __func__);
     return(0);
   }
 
@@ -491,7 +493,7 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
 
   /* to could save the mesh, the adjacency have to be correct */
   if ( mesh->info.ddebug && (!_MMG5_chkmsh(mesh,1,1) ) ) {
-    fprintf(stderr,"  ##  Problem. Invalid mesh.\n");
+    fprintf(stderr,"\n  ##  Warning: %s: invalid mesh.\n",__func__);
     return(0);
   }
 
@@ -677,7 +679,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
 #ifdef PATTERN
   if ( !_MMG5_mmg3d1_pattern(mesh,met) ) {
     if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
-      fprintf(stderr,"  ## Hashing problem. Invalid mesh.\n");
+      fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");
       _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
     }
     if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
@@ -686,7 +688,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
 #else
   if ( !_MMG5_mmg3d1_delone(mesh,met) ) {
     if ( (!mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
-      fprintf(stderr,"  ## Hashing problem. Invalid mesh.\n");
+      fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");
       _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
     }
     if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);

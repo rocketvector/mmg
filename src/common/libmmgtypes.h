@@ -426,6 +426,7 @@ typedef struct {
   MMG5_pPar     par;
   double        dhd,hmin,hmax,hsiz,hgrad,hausd,min[3],max[3],delta,ls;
   int           mem,npar,npari;
+  int           opnbdy;
   int           renum;
   int           octree;
   int           nmat;
@@ -434,7 +435,6 @@ typedef struct {
   char          parTyp; /*!< Contains binary flags to say which kind of local
                           param are setted: if \f$tag = 1+2+4\f$ then the point
                           is \a MG_Vert, MG_Tria and MG_Tetra */
-  char*         errMessage;
   unsigned char optim, optimLES, noinsert, noswap, nomove, nosurf;
   MMG5_pMat     mat;
 } MMG5_Info;

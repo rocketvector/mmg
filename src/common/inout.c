@@ -93,6 +93,7 @@ int _MMG5_countBinaryElts(FILE **inm, const int nelts,const int iswp,
                           int *np, int *na, int* nt,int *nq, int *ne, int *npr)
 {
   int    typ,num,tagNum,i,k,l,idx;
+  static char mmgWarn = 0;
 
   k = 0;
 
@@ -212,9 +213,11 @@ int _MMG5_countBinaryElts(FILE **inm, const int nelts,const int iswp,
       k  += num;
       break;
     default:
-      fprintf(stderr,"  ## Error: unexpected type of element (%d) for element %d\n",
-              typ,k);
-      // return 0;
+      if ( !mmgWarn ) {
+        fprintf(stderr,"\n  ## Warning: %s: unexpected type of element (%d) for at"
+                " least 1 element (%d).\n",__func__,typ,k);
+        mmgWarn = 1;
+      }
     }
   }
   return 1;
@@ -293,8 +296,8 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
       fscanf((*inm),"%s %d %d ",verNum,bin,&ver);
       mesh->ver = ver/4;
       if ( strncmp(verNum,"2.2",3) ) {
-        fprintf(stderr,"BAD FORMAT VERSION : %s\n",verNum);
-        fprintf(stderr," Please, use the format version 2.2\n");
+        fprintf(stderr,"\n  ## Error: %s: bad format version (%s)."
+                " Please, use the format version 2.2.\n",__func__,verNum);
         return(-1);
       }
       if ( *bin ) {
@@ -348,8 +351,8 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
         /* Integer tags */
         fscanf((*inm),"%d ",&tagNum);
         if ( tagNum < 3 ) {
-          fprintf(stderr,"   Error: node data: Expected at least 3 tags (%d given).\n",
-                  tagNum);
+          fprintf(stderr,"\n  ## Error: %s: node data: Expected at least 3 tags (%d given).\n",
+                  __func__,tagNum);
           return(-1);
         }
         fscanf((*inm),"%d ",&i); //time step
@@ -425,8 +428,8 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
 
   if ( !mesh->npi ) {
     fprintf(stderr,"  ** MISSING DATA.\n");
-    fprintf(stderr," Check that your mesh contains points and elements.\n");
-    fprintf(stderr," Exit program.\n");
+    fprintf(stderr,"     Check that your mesh contains points and elements.\n");
+    fprintf(stderr,"     Exit program.\n");
     return(-1);
   }
 
@@ -440,8 +443,8 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
 
   if ( !mesh->np ) {
     fprintf(stderr,"  ** MISSING DATA.\n");
-    fprintf(stderr," Check that your mesh contains points.\n");
-    fprintf(stderr," Exit program.\n");
+    fprintf(stderr,"     Check that your mesh contains points.\n");
+    fprintf(stderr,"     Exit program.\n");
     return(-1);
   }
   return 1;
@@ -478,6 +481,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
   int         *ina_t,*ina_a,nt,na,nq,ne,npr;
   int         nbl_t,nbl_a,typ,tagNum,ref,idx,num;
   int         v[4];
+  static char mmgWarn = 0;
 
   ina_t = ina_a = NULL;
 
@@ -555,8 +559,8 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
     {
       fscanf((*inm),"%d %d %d ",&i,&typ, &tagNum);
       if ( tagNum < 2 ) {
-        fprintf(stderr,"  ## Error: elt %d (type %d): Expected at least 2 tags (%d given).\n",
-                k,typ,tagNum);
+        fprintf(stderr,"\n  ## Error: %s: elt %d (type %d): Expected at least 2 tags (%d given).\n",
+                __func__,k,typ,tagNum);
         return(-1);
       }
       fscanf((*inm),"%d %d ",&ref,&i);
@@ -654,8 +658,11 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
         assert( l<=mesh->np );
         break;
       default:
-        fprintf(stderr,"  ## Warning: unexpected type of element:"
-                " element %d, type %d\n",k,typ );
+        if ( !mmgWarn ) {
+          fprintf(stderr,"\n  ## Warning: %s: unexpected type for at least 1 element:"
+                  " element %d, type %d\n",__func__,k,typ );
+          mmgWarn = 1;
+        }
       }
     }
   }
@@ -676,8 +683,8 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
           tagNum = _MMG5_swapbin(tagNum);
         }
         if ( tagNum < 2 ) {
-          fprintf(stderr,"  ## Error: Expected at least 2 tags per element (%d given).\n",
-                  tagNum);
+          fprintf(stderr,"\n  ## Error: %s: Expected at least 2 tags per element (%d given).\n",
+                  __func__,tagNum);
           return(-1);
         }
 
@@ -736,8 +743,8 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
           tagNum = _MMG5_swapbin(tagNum);
         }
         if ( tagNum < 2 ) {
-          fprintf(stderr,"  ## Error: Expected at least 2 tags per element (%d given).\n",
-                  tagNum);
+          fprintf(stderr,"\n  ## Error: %s: Expected at least 2 tags per element (%d given).\n",
+                  __func__,tagNum);
           return(-1);
         }
 
@@ -791,8 +798,8 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
           tagNum = _MMG5_swapbin(tagNum);
         }
        if ( tagNum < 2 ) {
-          fprintf(stderr,"  ## Error: Expected at least 2 tags per element (%d given).\n",
-                  tagNum);
+          fprintf(stderr,"\n  ## Error: %s: Expected at least 2 tags per element (%d given).\n",
+                  __func__,tagNum);
           return(-1);
         }
 
@@ -829,8 +836,8 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
         }
 
         if ( tagNum < 2 ) {
-          fprintf(stderr,"  ## Error: Expected at least 2 tags per element (%d given).\n",
-                  tagNum);
+          fprintf(stderr,"\n  ## Error: %s: Expected at least 2 tags per element (%d given).\n",
+                  __func__,tagNum);
           return(-1);
         }
 
@@ -875,8 +882,8 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
           tagNum = _MMG5_swapbin(tagNum);
         }
         if ( tagNum < 2 ) {
-          fprintf(stderr,"  ## Error: Expected at least 2 tags per element (%d given).\n",
-                  tagNum);
+          fprintf(stderr,"\n  ## Error: %s: Expected at least 2 tags per element (%d given).\n",
+                  __func__,tagNum);
           return(-1);
         }
 
@@ -922,8 +929,8 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
           tagNum = _MMG5_swapbin(tagNum);
         }
         if ( tagNum < 2 ) {
-          fprintf(stderr,"  ## Error: Expected at least 2 tags per element (%d given).\n",
-                  tagNum);
+          fprintf(stderr,"\n  ## Error: %s: Expected at least 2 tags per element (%d given).\n",
+                  __func__,tagNum);
           return(-1);
         }
 
@@ -948,7 +955,8 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
         k += num;
         break;
       default:
-        fprintf(stderr,"  ## Error: unexpected type of element (%d)\n",typ);
+        fprintf(stderr,"\n  ## Error: %s: unexpected type of element (%d)\n",
+                __func__,typ);
         return(-1);
       }
     }
@@ -1117,8 +1125,8 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
     /* Integer tags : allow to recover the number of sols and their types */
     fscanf((*inm),"%d ",&tagNum);
     if ( tagNum < 3 ) {
-      fprintf(stderr,"   Error: node data: Expected at least 3 tags (%d given).\n",
-              tagNum);
+      fprintf(stderr,"   Error: %s: node data: Expected at least 3 tags (%d given).\n",
+              __func__,tagNum);
       return(-1);
     }
 

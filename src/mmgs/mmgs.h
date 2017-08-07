@@ -169,7 +169,7 @@ int  delref(MMG5_pMesh);
 int  chkmet(MMG5_pMesh,MMG5_pSol);
 int  chknor(MMG5_pMesh);
 long long _MMG5_memSize(void);
-void _MMGS_memOption(MMG5_pMesh mesh);
+int _MMGS_memOption(MMG5_pMesh mesh);
 
 #ifdef USE_SCOTCH
 int _MMG5_mmgsRenumbering(int vertBoxNbr, MMG5_pMesh mesh, MMG5_pSol sol);
@@ -214,6 +214,8 @@ static inline
 void _MMGS_Set_commonFunc() {
   _MMG5_bezierCP          = _MMG5_mmgsBezierCP;
   _MMG5_chkmsh            = _MMG5_mmgsChkmsh;
+  _MMG5_indPt             = _MMGS_indPt;
+  _MMG5_indElt            = _MMGS_indElt;
 #ifdef USE_SCOTCH
   _MMG5_renumbering       = _MMG5_mmgsRenumbering;
 #endif

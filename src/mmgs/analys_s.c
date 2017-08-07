@@ -46,18 +46,19 @@
 static int setadj(MMG5_pMesh mesh){
   MMG5_pTria   pt,pt1;
   int          *adja,*adjb,adji1,adji2,*pile,iad,ipil,ip1,ip2,gen;
-  int          k,kk,iel,jel,nvf,nf,nr,nt,nre,ncc,ned,ref;
+  int          k,kk,iel,jel,nvf,nf,nr,nt,nre,nreq,ncc,ned,ref;
   int16_t      tag;
   char         i,ii,i1,i2,ii1,ii2,voy;
 
   if ( abs(mesh->info.imprim) > 5  || mesh->info.ddebug )
     fprintf(stdout,"  ** SETTING TOPOLOGY\n");
 
+  nvf = nf = ncc = ned = 0;
+
   _MMG5_SAFE_MALLOC(pile,mesh->nt+1,int,0);
 
-  pile[1]  = 1;
-  ipil     = 1;
-  nvf = nre = nr = nf = nt = ncc = ned = 0;
+  pile[1] = 1;
+  ipil    = 1;
 
   while ( ipil > 0 ) {
     ncc++;
@@ -65,12 +66,11 @@ static int setadj(MMG5_pMesh mesh){
     do {
       k  = pile[ipil--];
       pt = &mesh->tria[k];
-      pt->flag = 0;
+      pt->flag = 1;
       if ( !MG_EOK(pt) )  continue;
 
       pt->cc = ncc;
       adja = &mesh->adja[3*(k-1)+1];
-      nt++;
       for (i=0; i<3; i++) {
         i1  = _MMG5_inxt2[i];
         i2  = _MMG5_iprv2[i];
@@ -80,7 +80,7 @@ static int setadj(MMG5_pMesh mesh){
         if ( !mesh->point[ip1].tmp )  mesh->point[ip1].tmp = ++nvf;
         if ( !mesh->point[ip2].tmp )  mesh->point[ip2].tmp = ++nvf;
 
-        if ( MG_EDG(pt->tag[i]) ) {
+        if ( MG_EDG(pt->tag[i]) || pt->tag[i] & MG_REQ ) {
           mesh->point[ip1].tag |= pt->tag[i];
           mesh->point[ip2].tag |= pt->tag[i];
         }
@@ -90,7 +90,6 @@ static int setadj(MMG5_pMesh mesh){
           pt->tag[i] |= MG_GEO;
           mesh->point[ip1].tag |= MG_GEO;
           mesh->point[ip2].tag |= MG_GEO;
-          nr++;
           ned++;
           continue;
         }
@@ -99,28 +98,30 @@ static int setadj(MMG5_pMesh mesh){
         ii = adja[i] % 3;
         if ( kk > k )  ned++;
 
-        /* correct edge tag */
+        /* store adjacent */
         pt1 = &mesh->tria[kk];
-        if ( pt->tag[i] & MG_NOM && !(pt1->tag[ii] & MG_NOM) ) {
+
+        /* correct edge tag */
+        if ( (pt->tag[i] & MG_NOM) && !(pt1->tag[ii] & MG_NOM) ) {
           pt1->tag[ii] = pt->tag[i];
           pt1->edg[ii] = pt->edg[i];
           mesh->point[ip1].tag |= MG_NOM;
           mesh->point[ip2].tag |= MG_NOM;
+          continue;
         }
-        if ( pt1->tag[ii] & MG_NOM && !(pt->tag[i] & MG_NOM) ) {
+        if ( (pt1->tag[ii] & MG_NOM) && !(pt->tag[i] & MG_NOM) ) {
           pt->tag[i] = pt1->tag[ii];
           pt->edg[i] = pt1->edg[ii];
           mesh->point[ip1].tag |= MG_NOM;
           mesh->point[ip2].tag |= MG_NOM;
+          continue;
         }
-        if ( pt1->cc > 0 )  continue;
 
         if ( abs(pt1->ref) != abs(pt->ref) ) {
           pt->tag[i]   |= MG_REF;
           pt1->tag[ii] |= MG_REF;
           mesh->point[ip1].tag |= MG_REF;
           mesh->point[ip2].tag |= MG_REF;
-          nre++;
         }
 
         /* store adjacent */
@@ -140,7 +141,6 @@ static int setadj(MMG5_pMesh mesh){
             pt1->ref      = -abs(pt1->ref);
             pt->tag[i]   |= MG_REF;
             pt1->tag[ii] |= MG_REF;
-            nre++;
           }
           /* flip orientation */
           else if ( !(pt->tag[i] & MG_NOM) ) {
@@ -182,11 +182,11 @@ static int setadj(MMG5_pMesh mesh){
     }
     while ( ipil > 0 );
 
-    /* find next triangle */
+    /* find next unmarked triangle */
     ipil = 0;
     for (kk=1; kk<=mesh->nt; kk++) {
       pt = &mesh->tria[kk];
-      if ( pt->v[0] && (pt->cc == 0) ) {
+      if ( MG_EOK(pt) && (pt->cc == 0) ) {
         ipil = 1;
         pile[ipil] = kk;
         pt->flag   = 1;
@@ -196,31 +196,35 @@ static int setadj(MMG5_pMesh mesh){
   }
 
   /* bilan */
-  nr = nre = 0;
+  nr = nre = nreq = nt = 0;
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) )  continue;
+    nt++;
+    adja = &mesh->adja[3*(k-1)+1];
     for (i=0; i<3; i++) {
-      if ( !MG_EDG(pt->tag[i]) )  continue;
+      if ( ( !MG_EDG(pt->tag[i]) ) && ( !(pt->tag[i] & MG_REQ) ) )  continue;
 
-      adja = &mesh->adja[3*(k-1)+1];
       jel  = adja[i] / 3;
       if ( !jel || jel > k ) {
         if ( pt->tag[i] & MG_GEO )  nr++;
         if ( pt->tag[i] & MG_REF )  nre++;
+        if ( pt->tag[i] & MG_REQ )  nreq++;
       }
     }
   }
 
   if ( mesh->info.ddebug ) {
     fprintf(stdout,"  a- ridges: %d found.\n",nr);
+    fprintf(stdout,"  a- requir: %d found.\n",nreq);
     fprintf(stdout,"  a- connex: %d connected component(s)\n",ncc);
     fprintf(stdout,"  a- orient: %d flipped\n",nf);
   }
-  else if ( abs(mesh->info.imprim) > 4 ) {
+  else if ( abs(mesh->info.imprim) > 3 ) {
     gen = (2 - nvf + ned - nt) / 2;
     fprintf(stdout,"     Connected component: %d,  genus: %d,   reoriented: %d\n",ncc,gen,nf);
-    fprintf(stdout,"     Edges: %d,  tagged: %d,  ridges: %d,  refs: %d\n",ned,nr+nre,nr,nre);
+    fprintf(stdout,"     Edges: %d,  tagged: %d,  ridges: %d, required: %d, refs: %d\n",
+            ned,nr+nre+nreq,nr,nreq,nre);
   }
 
   _MMG5_SAFE_FREE(pile);
@@ -814,25 +818,25 @@ int _MMGS_analys(MMG5_pMesh mesh) {
 
   /* set tria edges tags */
   if ( !assignEdge(mesh) ) {
-    fprintf(stderr,"  ## Analysis problem. Exit program.\n");
+    fprintf(stderr,"\n  ## Analysis problem. Exit program.\n");
     return(0);
   }
 
   /* create adjacency */
   if ( !_MMGS_hashTria(mesh) ) {
-    fprintf(stderr,"  ## Hashing problem. Exit program.\n");
+    fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
     return(0);
   }
 
   /* delete badly shaped elts */
   /*if ( mesh->info.badkal && !delbad(mesh) ) {
-    fprintf(stderr,"  ## Geometry trouble. Exit program.\n");
+    fprintf(stderr,"\n  ## Geometry trouble. Exit program.\n");
     return(0);
     }*/
 
   /* identify connexity */
   if ( !setadj(mesh) ) {
-    fprintf(stderr,"  ## Topology problem. Exit program.\n");
+    fprintf(stderr,"\n  ## Topology problem. Exit program.\n");
     return(0);
   }
 
@@ -841,25 +845,25 @@ int _MMGS_analys(MMG5_pMesh mesh) {
 
   /* check for ridges */
   if ( mesh->info.dhd > _MMG5_ANGLIM && !setdhd(mesh) ) {
-    fprintf(stderr,"  ## Geometry problem. Exit program.\n");
+    fprintf(stderr,"\n  ## Geometry problem. Exit program.\n");
     return(0);
   }
 
   /* identify singularities */
   if ( !_MMG5_singul(mesh) ) {
-    fprintf(stderr,"  ## Singularity problem. Exit program.\n");
+    fprintf(stderr,"\n  ## Singularity problem. Exit program.\n");
     return(0);
   }
 
   /* define normals */
   if ( !mesh->xp ) {
     if ( !norver(mesh) ) {
-      fprintf(stderr,"  ## Normal problem. Exit program.\n");
+      fprintf(stderr,"\n  ## Normal problem. Exit program.\n");
       return(0);
     }
     /* regularize normals */
     if ( mesh->info.nreg && !regnor(mesh) ) {
-      fprintf(stderr,"  ## Normal regularization problem. Exit program.\n");
+      fprintf(stderr,"\n  ## Normal regularization problem. Exit program.\n");
       return(0);
     }
   }
