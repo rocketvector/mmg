@@ -779,11 +779,8 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
           ia = _MMG5_idir[ip][j];
           if ( pt->v[ia]==p0_c[i] ) {
             pxt->tag[_MMG5_arpt[ip][j]] |= pxt1->tag[ind[i][0]];
-            if ( !pxt->edg[_MMG5_arpt[ip][j]] )
-              pxt->edg[_MMG5_arpt[ip][j]] = pxt1->edg[ind[i][0]];
-            else if ( pxt1->edg[ind[i][0]] )
-              pxt->edg[_MMG5_arpt[ip][j]] =
-                MG_MAX(pxt->edg[_MMG5_arpt[ip][j]],pxt1->edg[ind[i][0]]);
+            pxt->edg[_MMG5_arpt[ip][j]] =
+              MG_MAX(pxt->edg[_MMG5_arpt[ip][j]],pxt1->edg[ind[i][0]]);
             break;
           }
         }
