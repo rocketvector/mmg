@@ -790,6 +790,71 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
 }
 
 /**
+ * \param pxt pointer toward the xtetra of the tetra in which we try to collapse
+ * \param ip local index of point that we want to collapse
+ * \param iq local index of point on which we want to collapse
+ * \param ia index of the edge ip-iq in the tetra.
+ * \param idx index of the one of the 2 faces sharing the edge ia that we look.
+ *
+ * \return 0 if we try to merge a tagged edge over a non-tagged edge or an edge
+ * of different tag (with the MG_BDY tag being ignored), 1 otherwise.
+ *
+ * Test if the collapse of ip over iq is possible without loosing some edges
+ * tags.
+ *
+ */
+static inline
+int _MMG3D_chkMergedEdgeTags(MMG5_pxTetra pxt,int ip,int iq,int ia,int idx) {
+
+  int  ifac,j,ip0,ip1,ia_tet0,ia_tet1;
+  char tag0,tag1;
+
+  ifac = _MMG5_ifar[ia][0];
+
+  for ( j=0; j<3; ++j ) {
+    ip0 = _MMG5_idir[ifac][_MMG5_inxt2[j]];
+    ip1 = _MMG5_idir[ifac][_MMG5_iprv2[j]];
+    if ( ip0 == ip ) break;
+  }
+  assert ( j!=3 );
+  if ( ip1 == iq ) {
+    ia_tet0 = _MMG5_iarf[ifac][_MMG5_iprv2[j]];
+    ia_tet1 = _MMG5_iarf[ifac][_MMG5_inxt2[j]];
+  }
+  else {
+    ia_tet0 = _MMG5_iarf[ifac][j];
+    ia_tet1 = _MMG5_iarf[ifac][_MMG5_inxt2[j]];
+    assert ( iq == _MMG5_idir[ifac][j] );
+  }
+  assert ( (ip==_MMG5_iare[ia_tet0][0] && (iq!=_MMG5_iare[ia_tet0][1]) ) ||
+           (iq!=_MMG5_iare[ia_tet0][0] && (ip==_MMG5_iare[ia_tet0][1]) ) );
+
+  assert ( (iq==_MMG5_iare[ia_tet1][0] && (ip!=_MMG5_iare[ia_tet1][1]) ) ||
+           (ip!=_MMG5_iare[ia_tet1][0] && (iq==_MMG5_iare[ia_tet1][1]) ) );
+
+  tag0 = pxt->tag[ia_tet0];
+  tag1 = pxt->tag[ia_tet1];
+  tag0 &= ~MG_BDY;
+  tag1 &= ~MG_BDY;
+
+  if ( !tag0 ) {
+    /* We merge a non tagged edge over another edge : OK */
+    return 1;
+  }
+  else if ( !tag1 ) {
+    /* np belongs to a tagged edge, nq a non-tag edge: don't collapse */
+    return 0;
+  }
+  else if ( tag0 != tag1 ) {
+    /* both edges are tagged with different tags: don't collapse */
+    return 0;
+  }
+
+  return 1;
+}
+
+
+/**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param typchk type of checking permformed for edge length (hmin or LSHORT criterion).
@@ -805,7 +870,7 @@ static int _MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   MMG5_pPar       par;
   double     ll,ux,uy,uz,hmi2;
   int        k,nc,list[MMG3D_LMAX+2],ilist,ilists,lists[MMG3D_LMAX+2];
-  int        base,nnm,l,kk,isloc,ifac1;
+  int        base,nnm,l,kk,isloc,ifac1,ia;
   int16_t    tag,isnm;
   char       i,j,ip,iq;
   int        ier;
@@ -964,6 +1029,7 @@ static int _MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
             isnm = (tag & MG_NOM);
 
             if ( p0->tag > tag ) continue;
+
             if ( isnm && mesh->adja[4*(k-1)+1+i] )  continue;
             if (_MMG5_boulesurfvolp(mesh,k,ip,i,
                                     list,&ilist,lists,&ilists,p0->tag & MG_NOM) < 0 )
@@ -984,6 +1050,16 @@ static int _MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
             if ( mesh->adja[4*(k-1)+1+i] )  continue;
           }
           if ( p0->tag > tag )  continue;
+
+          ia = _MMG5_iarf[i][j];
+
+          /* Do not collapse if we can loos edge tags */
+          if ( !_MMG3D_chkMergedEdgeTags(pxt,ip,iq,ia,0 ) )
+            continue;
+
+          if ( !_MMG3D_chkMergedEdgeTags(pxt,ip,iq,ia,1 ) )
+            continue;
+
           ilist = _MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,typchk);
         }
         /* internal face */
