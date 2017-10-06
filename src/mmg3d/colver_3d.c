@@ -703,8 +703,8 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
   MMG5_pTetra          pt,pt1;
   MMG5_pxTetra         pxt,pxt1;
   MMG5_xTetra          xt,xts;
-  int             i,iel,jel,pel,qel,k,np,nq,*adja,p0,p1;
-  unsigned char   ip,iq,j,voy,voyp,voyq,ia,iav;
+  int             i,iel,jel,pel,qel,k,np,nq,*adja,p0,p1,i2;
+  unsigned char   ip,iq,j,voy,voyp,voyq,ia,iav,ia2;
   unsigned char   (*ind)[2];
   int             *p0_c,*p1_c;
   char            indar[4][4][2] = {
@@ -892,8 +892,27 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
                   break;
               }
             }
+            for ( i2=0; i2<3; i2++ ) {
+              ia2 =_MMG5_iarf[iq][i2];
+              if ( p0==nq ) {
+                if ( ((pt->v[_MMG5_iare[ia2][0]]==np) && (pt->v[_MMG5_iare[ia2][1]]==p1)) ||
+                     ((pt->v[_MMG5_iare[ia2][0]]==p1) && (pt->v[_MMG5_iare[ia2][1]]==np)) )
+                  break;
+              }
+              else if ( p1==nq ) {
+                if ( ((pt->v[_MMG5_iare[ia2][0]]==np) && (pt->v[_MMG5_iare[ia2][1]]==p0)) ||
+                     ((pt->v[_MMG5_iare[ia2][0]]==p0) && (pt->v[_MMG5_iare[ia2][1]]==np)) )
+                  break;
+              }
+              else {
+                if ( ((pt->v[_MMG5_iare[ia2][0]]==p0) && (pt->v[_MMG5_iare[ia2][1]]==p1)) ||
+                     ((pt->v[_MMG5_iare[ia2][0]]==p1) && (pt->v[_MMG5_iare[ia2][1]]==p0)) )
+                  break;
+              }
+            }
             assert(i!=3);
-            pxt1->tag[iav] = pxt1->tag[iav] | pxt->tag[ia];
+            assert(i2!=3);
+            pxt1->tag[iav] = pxt1->tag[iav] | pxt->tag[ia] | pxt->tag[ia2];
             pxt1->edg[iav] = MG_MAX(pxt1->edg[iav],pxt->edg[ia]);
           }
         }
@@ -929,8 +948,27 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
                     break;
                 }
               }
+              for ( i2=0; i2<3; i2++ ) {
+                ia2 =_MMG5_iarf[iq][i2];
+                if ( p0==nq ) {
+                  if ( ((pt->v[_MMG5_iare[ia2][0]]==np) && (pt->v[_MMG5_iare[ia2][1]]==p1)) ||
+                       ((pt->v[_MMG5_iare[ia2][0]]==p1) && (pt->v[_MMG5_iare[ia2][1]]==np)) )
+                    break;
+                }
+                else if ( p1==nq ) {
+                  if ( ((pt->v[_MMG5_iare[ia2][0]]==np) && (pt->v[_MMG5_iare[ia2][1]]==p0)) ||
+                       ((pt->v[_MMG5_iare[ia2][0]]==p0) && (pt->v[_MMG5_iare[ia2][1]]==np)) )
+                    break;
+                }
+                else {
+                  if ( ((pt->v[_MMG5_iare[ia2][0]]==p0) && (pt->v[_MMG5_iare[ia2][1]]==p1)) ||
+                       ((pt->v[_MMG5_iare[ia2][0]]==p1) && (pt->v[_MMG5_iare[ia2][1]]==p0)) )
+                    break;
+                }
+              }
               assert(i!=3);
-              pxt1->tag[iav] = pxt->tag[ia];
+              assert(i2!=3);
+              pxt1->tag[iav] = pxt->tag[ia] | pxt->tag[ia2];
               pxt1->edg[iav] = pxt->edg[ia];
             }
           }
@@ -995,8 +1033,29 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
                     break;
                 }
               }
+              for ( i2=0; i2<3; i2++ ) {
+                ia2=_MMG5_iarf[ip][i2];
+                if ( p0==np ) {
+                  if ( ((pt->v[_MMG5_iare[ia2][0]]==nq) && (pt->v[_MMG5_iare[ia2][1]]==p1)) ||
+                       ((pt->v[_MMG5_iare[ia2][0]]==p1) && (pt->v[_MMG5_iare[ia2][1]]==nq)) )
+                    break;
+                }
+                else if ( p1==np ) {
+                  if ( ((pt->v[_MMG5_iare[ia2][0]]==nq ) && (pt->v[_MMG5_iare[ia2][1]]==p0)) ||
+                       ((pt->v[_MMG5_iare[ia2][0]]==p0 ) && (pt->v[_MMG5_iare[ia2][1]]==nq )) )
+                    break;
+                }
+                else {
+                  if ( ((pt->v[_MMG5_iare[ia2][0]]==p0) && (pt->v[_MMG5_iare[ia2][1]]==p1)) ||
+                       ((pt->v[_MMG5_iare[ia2][0]]==p1) && (pt->v[_MMG5_iare[ia2][1]]==p0)) )
+                    break;
+                }
+              }
+
               assert(i!=3);
-              pxt1->tag[iav] = pxt1->tag[iav] | pxt->tag[ia];
+              assert(i2!=3);
+
+              pxt1->tag[iav] = pxt1->tag[iav] | pxt->tag[ia] | pxt->tag[ia2];
               pxt1->edg[iav] = MG_MAX(pxt1->edg[iav],pxt->edg[ia]);
             }
           }
@@ -1031,8 +1090,28 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
                       break;
                   }
                 }
+                for ( i2=0; i2<3; i2++ ) {
+                  ia2=_MMG5_iarf[ip][i2];
+                  if ( p0==np ) {
+                    if ( ((pt->v[_MMG5_iare[ia2][0]]==nq) && (pt->v[_MMG5_iare[ia2][1]]==p1)) ||
+                         ((pt->v[_MMG5_iare[ia2][0]]==p1) && (pt->v[_MMG5_iare[ia2][1]]==nq)) )
+                      break;
+                  }
+                  else if ( p1==np ) {
+                    if ( ((pt->v[_MMG5_iare[ia2][0]]==nq ) && (pt->v[_MMG5_iare[ia2][1]]==p0)) ||
+                         ((pt->v[_MMG5_iare[ia2][0]]==p0 ) && (pt->v[_MMG5_iare[ia2][1]]==nq )) )
+                      break;
+                  }
+                  else {
+                    if ( ((pt->v[_MMG5_iare[ia2][0]]==p0) && (pt->v[_MMG5_iare[ia2][1]]==p1)) ||
+                         ((pt->v[_MMG5_iare[ia2][0]]==p1) && (pt->v[_MMG5_iare[ia2][1]]==p0)) )
+                      break;
+                  }
+                }
+
                 assert(i!=3);
-                pxt1->tag[iav] = pxt->tag[ia];
+                assert(i2!=3);
+                pxt1->tag[iav] = pxt->tag[ia] | pxt->tag[ia2] ;
                 pxt1->edg[iav] = pxt->edg[ia];
               }
             }
@@ -1097,8 +1176,28 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
                     break;
                 }
               }
+              for ( i2=0; i2<3; i2++ ) {
+                ia2=_MMG5_iarf[ip][i2];
+                if ( p0==np ) {
+                  if ( ((pt->v[_MMG5_iare[ia2][0]]==nq) && (pt->v[_MMG5_iare[ia2][1]]==p1)) ||
+                       ((pt->v[_MMG5_iare[ia2][0]]==p1) && (pt->v[_MMG5_iare[ia2][1]]==nq)) )
+                    break;
+                }
+                else if ( p1==np ) {
+                  if ( ((pt->v[_MMG5_iare[ia2][0]]==nq ) && (pt->v[_MMG5_iare[ia2][1]]==p0)) ||
+                       ((pt->v[_MMG5_iare[ia2][0]]==p0 ) && (pt->v[_MMG5_iare[ia2][1]]==nq )) )
+                    break;
+                }
+                else {
+                  if ( ((pt->v[_MMG5_iare[ia2][0]]==p0) && (pt->v[_MMG5_iare[ia2][1]]==p1)) ||
+                       ((pt->v[_MMG5_iare[ia2][0]]==p1) && (pt->v[_MMG5_iare[ia2][1]]==p0)) )
+                    break;
+                }
+              }
+
               assert(i!=3);
-              pxt1->tag[iav] = pxt->tag[ia];
+              assert(i2!=3);
+              pxt1->tag[iav] = pxt->tag[ia] | pxt->tag[ia2];
               pxt1->edg[iav] = pxt->edg[ia];
             }
           }
@@ -1134,8 +1233,28 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
                     break;
                 }
               }
+              for ( i2=0; i2<3; i2++ ) {
+                ia2=_MMG5_iarf[ip][i2];
+                if ( p0==np ) {
+                  if ( ((pt->v[_MMG5_iare[ia2][0]]==nq) && (pt->v[_MMG5_iare[ia2][1]]==p1)) ||
+                       ((pt->v[_MMG5_iare[ia2][0]]==p1) && (pt->v[_MMG5_iare[ia2][1]]==nq)) )
+                    break;
+                }
+                else if ( p1==np ) {
+                  if ( ((pt->v[_MMG5_iare[ia2][0]]==nq ) && (pt->v[_MMG5_iare[ia2][1]]==p0)) ||
+                       ((pt->v[_MMG5_iare[ia2][0]]==p0 ) && (pt->v[_MMG5_iare[ia2][1]]==nq )) )
+                    break;
+                }
+                else {
+                  if ( ((pt->v[_MMG5_iare[ia2][0]]==p0) && (pt->v[_MMG5_iare[ia2][1]]==p1)) ||
+                       ((pt->v[_MMG5_iare[ia2][0]]==p1) && (pt->v[_MMG5_iare[ia2][1]]==p0)) )
+                    break;
+                }
+              }
+
               assert(i!=3);
-              pxt1->tag[iav] = pxt->tag[ia];
+              assert(i2!=3);
+              pxt1->tag[iav] = pxt->tag[ia] | pxt->tag[ia2];
               pxt1->edg[iav] = pxt->edg[ia];
             }
           }
